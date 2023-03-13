@@ -191,7 +191,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_NAV] = LAYOUT( \
   XXXXXXX, XXXXXXX,     XXXXXXX,    XXXXXXX,       XXXXXXX,          XXXXXXX,                     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX, \
-  XXXXXXX, TD(TD_BOOT), TD(TD_TAP), TD(TD_QWERTY), TD(TD_COLEMAKDH), CG_TOGG,                     KC_AGIN, KC_PSTE, KC_COPY, KC_CUT,  KC_UNDO,  XXXXXXX, \
+  XXXXXXX, TD(TD_BOOT), TD(TD_TAP), TD(TD_QWERTY), TD(TD_COLEMAKDH), CG_TOGG,                     KC_AGIN, S(KC_INS), C(KC_INS), S(KC_INS),  KC_UNDO,  XXXXXXX, \
   XXXXXXX, KC_LGUI,     KC_LALT,    KC_LCTL,       KC_LSFT,          XXXXXXX,                     CW_TOGG, KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT, KC_CAPS, \
   XXXXXXX, MO(_BUTTON), XXXXXXX,    TD(TD_NUM),    TD(TD_NAV),       XXXXXXX, KC_MUTE,   XXXXXXX, KC_INS,  KC_HOME, KC_PGDN, KC_PGUP, KC_END,   XXXXXXX, \
                                       XXXXXXX, XXXXXXX, _______, _______, _______,          KC_ENT, KC_BSPC, KC_DEL, XXXXXXX, XXXXXXX \
@@ -199,7 +199,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_MOUSE] = LAYOUT( \
   XXXXXXX, XXXXXXX,     XXXXXXX,    XXXXXXX,       XXXXXXX,          XXXXXXX,                     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
-  XXXXXXX, TD(TD_BOOT), TD(TD_TAP), TD(TD_QWERTY), TD(TD_COLEMAKDH), CG_TOGG,                     KC_AGIN, KC_PSTE, KC_COPY, KC_CUT,  KC_UNDO, XXXXXXX, \
+  XXXXXXX, TD(TD_BOOT), TD(TD_TAP), TD(TD_QWERTY), TD(TD_COLEMAKDH), CG_TOGG,                     KC_AGIN, S(KC_INS), C(KC_INS), S(KC_INS),  KC_UNDO, XXXXXXX, \
   XXXXXXX, KC_LGUI,     KC_LALT,    KC_LCTL,       KC_LSFT,          XXXXXXX,                     XXXXXXX, KC_MS_L, KC_MS_D, KC_MS_U, KC_MS_R, XXXXXXX, \
   XXXXXXX, MO(_BUTTON), XXXXXXX,    TD(TD_SYM),    TD(TD_MOUSE),     XXXXXXX, KC_MUTE,   XXXXXXX, XXXXXXX, KC_WH_L, KC_WH_D, KC_WH_U, KC_WH_R, XXXXXXX, \
                                       XXXXXXX, XXXXXXX, _______, _______, _______,          KC_BTN2, KC_BTN1, KC_BTN3, XXXXXXX, XXXXXXX \
@@ -239,9 +239,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_BUTTON] = LAYOUT( \
   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                       XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
-  XXXXXXX, KC_UNDO, KC_CUT,  KC_COPY, KC_PSTE, KC_AGIN,                       KC_AGIN, KC_PSTE, KC_COPY, KC_CUT,  KC_UNDO,  XXXXXXX, \
+  XXXXXXX, KC_UNDO, S(KC_INS),  C(KC_INS), S(KC_INS), KC_AGIN,                       KC_AGIN, S(KC_INS), C(KC_INS), S(KC_INS),  KC_UNDO,  XXXXXXX, \
   XXXXXXX, KC_LGUI, KC_LALT, KC_LCTL, KC_LSFT, XXXXXXX,                       XXXXXXX, KC_RSFT, KC_RCTL, KC_RALT, KC_RGUI, XXXXXXX, \
-  XXXXXXX, KC_UNDO, KC_CUT,  KC_COPY, KC_PSTE, KC_AGIN, KC_MUTE,     XXXXXXX, KC_AGIN, KC_PSTE, KC_COPY, KC_CUT,  KC_UNDO,  XXXXXXX, \
+  XXXXXXX, KC_UNDO, S(KC_INS),  C(KC_INS), S(KC_INS), KC_AGIN, KC_MUTE,     XXXXXXX, KC_AGIN, S(KC_INS), C(KC_INS), S(KC_INS),  KC_UNDO,  XXXXXXX, \
               XXXXXXX, XXXXXXX, KC_BTN3, KC_BTN1, KC_BTN2,             KC_BTN2, KC_BTN1, KC_BTN3, XXXXXXX, XXXXXXX \
 ),
 
@@ -254,68 +254,53 @@ static void print_status_wide(void) {
     oled_write_ln_P(PSTR(""), false);
 
     // Print current mode
-    switch (get_highest_layer(default_layer_state)) {
-        case _QWERTY:
-            oled_write_P(PSTR("QWERTY "), false);
-            break;
-        case _COLEMAKDH:
-            oled_write_P(PSTR("COLEMAK-DH "), false);
-            break;
-        case _TAP:
-            oled_write_P(PSTR("TAP COLEMAK-DH "), true);
-            break;
-        default:
-            oled_write_P(PSTR("OTHER "), false);
-    }
-
     if (keymap_config.swap_lctl_lgui) {
-        oled_write_P(PSTR("(Mac) "), false);
+        oled_write_P(PSTR("  MAC "), false);
     } else {
-        oled_write_P(PSTR("(Win) "), false);
+        oled_write_P(PSTR("  WIN "), false);
     }
-
-    oled_write_P(PSTR("\n\n"), false);
 
     // Current layer indicator
-    switch (get_highest_layer(layer_state)) {
+    switch (get_highest_layer(default_layer_state | layer_state)) {
         case _COLEMAKDH:
+            oled_write_ln_P(PSTR("COLEMAK-DH"), false);
+            break;
         case _QWERTY:
+            oled_write_ln_P(PSTR("QWERTY"), true);
+            break;
         case _TAP:
-            oled_write_P(PSTR("   "), false);
+            oled_write_ln_P(PSTR("TAP"), true);
             break;
         case _NAV:
-            oled_write_P(PSTR("NAV"), true);
+            oled_write_ln_P(PSTR("NAV"), true);
             break;
         case _MOUSE:
-            oled_write_P(PSTR("MOU"), true);
+            oled_write_ln_P(PSTR("MOUSE"), true);
             break;
         case _MEDIA:
-            oled_write_P(PSTR("MED"), true);
+            oled_write_ln_P(PSTR("MEDIA"), true);
             break;
         case _NUM:
-            oled_write_P(PSTR("NUM"), true);
+            oled_write_ln_P(PSTR("NUM"), true);
             break;
         case _SYM:
-            oled_write_P(PSTR("SYM"), true);
+            oled_write_ln_P(PSTR("SYM"), true);
             break;
         case _FUN:
-            oled_write_P(PSTR("FUN"), true);
+            oled_write_ln_P(PSTR("FUN"), true);
             break;
         case _BUTTON:
-            oled_write_P(PSTR("BTN"), true);
+            oled_write_ln_P(PSTR("BTN"), true);
             break;
         default:
-            oled_write_P(PSTR("???"), true);
+            oled_write_ln_P(PSTR("OTHER"), true);
     }
 
     // Capslock indicator
     led_t led_usb_state = host_keyboard_led_state();
     if (led_usb_state.caps_lock) {
         oled_write_P(PSTR(" CAPS "), true);
-    } else {
-        oled_write_P(PSTR("      "), false);
     }
-
 }
 
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
@@ -468,45 +453,46 @@ bool oled_task_user(void) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
     switch (keycode) {
-        case KC_CUT:
-            // may be better to use Shift+Del to work anywhere (e.g. linux terminal)
-            // need to test on macOS
-            if (record->event.pressed) {
-                // cmd on macOS but CW_TOGG swaps this
-                register_mods(mod_config(MOD_LCTL));
-                register_code(KC_X);
-            } else {
-                unregister_mods(mod_config(MOD_LCTL));
-                unregister_code(KC_X);
-            }
-            return false;
-            break;
-        case KC_COPY:
-            // may be better to use Ctrl+Ins to work anywhere (e.g. linux terminal)
-            // need to test on macOS
-            if (record->event.pressed) {
-                register_mods(mod_config(MOD_LCTL));
-                register_code(KC_C);
-            } else {
-                unregister_mods(mod_config(MOD_LCTL));
-                unregister_code(KC_C);
-            }
-            return false;
-            break;
-        case KC_PASTE:
-            // may be better to use Shift+Ins to work anywhere (e.g. linux terminal)
-            // need to test on macOS
-            if (record->event.pressed) {
-                register_mods(mod_config(MOD_LCTL));
-                register_code(KC_V);
-            } else {
-                unregister_mods(mod_config(MOD_LCTL));
-                unregister_code(KC_V);
-            }
-            return false;
-            break;
+        // case KC_CUT:
+        //     // may be better to use Shift+Del to work anywhere (e.g. linux terminal)
+        //     // need to test on macOS
+        //     if (record->event.pressed) {
+        //         // cmd on macOS but CW_TOGG swaps this
+        //         register_mods(mod_config(MOD_LCTL));
+        //         register_code(KC_X);
+        //     } else {
+        //         unregister_mods(mod_config(MOD_LCTL));
+        //         unregister_code(KC_X);
+        //     }
+        //     return false;
+        //     break;
+        // case KC_COPY:
+        //     // may be better to use Ctrl+Ins to work anywhere (e.g. linux terminal)
+        //     // need to test on macOS
+        //     if (record->event.pressed) {
+        //         register_mods(mod_config(MOD_LCTL));
+        //         register_code(KC_C);
+        //     } else {
+        //         unregister_mods(mod_config(MOD_LCTL));
+        //         unregister_code(KC_C);
+        //     }
+        //     return false;
+        //     break;
+        // case KC_PASTE:
+        //     // may be better to use Shift+Ins to work anywhere (e.g. linux terminal)
+        //     // need to test on macOS
+        //     if (record->event.pressed) {
+        //         register_mods(mod_config(MOD_LCTL));
+        //         register_code(KC_V);
+        //     } else {
+        //         unregister_mods(mod_config(MOD_LCTL));
+        //         unregister_code(KC_V);
+        //     }
+        //     return false;
+        //     break;
         case KC_UNDO:
             if (record->event.pressed) {
+                // cmd on macOS but CW_TOGG swaps this
                 register_mods(mod_config(MOD_LCTL));
                 register_code(KC_Z);
             } else {
@@ -561,6 +547,11 @@ static uint32_t       last_mouse_activity = 0;
 static report_mouse_t last_mouse_report   = {0};
 static bool           trackball_scrolling = false;
 
+void pointing_device_init_user(void) {
+    set_auto_mouse_layer(_BUTTON);
+    set_auto_mouse_enable(true);
+}
+
 report_mouse_t smooth_mouse_movement(report_mouse_t mouse_report) {
 
     mouse_report.x = ease8InOutApprox(lerp8by8(last_mouse_report.x, mouse_report.x, 0.5));
@@ -591,9 +582,12 @@ layer_state_t layer_state_set_user(layer_state_t layer_state) {
 
     switch (get_highest_layer(layer_state)) {
         case _NAV:
+        case _MOUSE:
+            set_auto_mouse_enable(false);
             trackball_scrolling = true;
             break;
         default:
+            set_auto_mouse_enable(true);
             trackball_scrolling = false;
     }
 
