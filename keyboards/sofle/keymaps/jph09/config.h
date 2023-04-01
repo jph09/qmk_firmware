@@ -20,20 +20,19 @@
 #define EE_HANDS
 
 /* trackball options */
-#define POINTING_DEVICE_ROTATION_90
 #define SPLIT_POINTING_ENABLE
 #define POINTING_DEVICE_RIGHT
+#define POINTING_DEVICE_ROTATION_90
 #define POINTING_DEVICE_TASK_THROTTLE_MS 8
 #define POINTING_DEVICE_AUTO_MOUSE_ENABLE
+#define TRACKBALL_LED_TIMEOUT 3000 // time in milliseconds
 
 /* OLED options */
 #define SPLIT_OLED_ENABLE
 #define SPLIT_WPM_ENABLE
 
-/* clear default encoder def */
+/* encoder settings */
 #undef TAP_CODE_DELAY
-
-/* encoder support */
 #define TAP_CODE_DELAY 100
 #define ENCODER_DIRECTION_FLIP
 
@@ -50,16 +49,10 @@
 #define MOUSEKEY_TIME_TO_MAX    64
 
 /* Mod Tap */
-// Configure the global tapping term (default: 200ms)
 #undef TAPPING_TERM
-#define TAPPING_TERM 220
-// Prevent normal rollover on alphas from accidentally triggering mods.
-#define IGNORE_MOD_TAP_INTERRUPT
-// Enable rapid switch from tap to hold, disables double tap hold auto-repeat.
-#define TAPPING_FORCE_HOLD
-
-/* CAPS WORD */
-#define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
+#define TAPPING_TERM 220 // Configure the global tapping term (default: 200ms)
+#define IGNORE_MOD_TAP_INTERRUPT // Prevent normal rollover on alphas from accidentally triggering mods.
+#define QUICK_TAP_TERM 0 // Enable rapid switch from tap to hold, disables double tap hold auto-repeat.
 
 // Saving space
 #define NO_ACTION_ONESHOT
