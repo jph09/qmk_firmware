@@ -413,12 +413,12 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
 bool oled_task_user(void) {
     if (is_keyboard_left()) {
         print_status_wide();
-    // } else {
+    } else {
     //     render_anim();
-    //     oled_set_cursor(1,12);
-    //     oled_write_P(PSTR("WPM"), false);
-    //     oled_set_cursor(1,13);
-    //     oled_write(get_u8_str(get_current_wpm(), '0'), false);
+        oled_set_cursor(1,12);
+        oled_write_P(PSTR("WPM"), false);
+        oled_set_cursor(1,13);
+        oled_write(get_u8_str(get_current_wpm(), '0'), false);
     }
     return false;
 }
@@ -428,7 +428,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
     switch (keycode) {
         // TODO need to override all the MT and LT keycodes
-
+        case LGUI_T(KC_TRNS):
+            if (record->tap.count && record->event.pressed) {
+                // TODO get keycode from lower layer then send a tap
+                return false;
+            }
+            break;
 
 
         // case KC_CUT:
