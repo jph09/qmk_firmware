@@ -20,7 +20,7 @@
 
 
 enum sofle_layers {
-    _COLEMAKDH = 0,
+    _BASE = 0,
     _QWERTY,
     _TAP,
     _NAV,
@@ -42,7 +42,7 @@ enum sofle_layers {
 /* Safety Tap Dance on special functions */
 enum {
     TD_BOOT = 0,
-    TD_COLEMAKDH,
+    TD_BASE,
     TD_QWERTY,
     TD_TAP,
     TD_NAV,
@@ -51,6 +51,8 @@ enum {
     TD_NUM,
     TD_SYM,
     TD_FUN,
+    TD_LEFT,
+    TD_RIGHT,
 };
 
 void tap_dance_boot(tap_dance_state_t *state, void *user_data) {
@@ -59,10 +61,10 @@ void tap_dance_boot(tap_dance_state_t *state, void *user_data) {
     }
 };
 
-void tap_dance_layer_colemakdh(tap_dance_state_t *state, void *user_data) {
+void tap_dance_layer_base(tap_dance_state_t *state, void *user_data) {
     if (state->count == 2) {
-        // set_single_persistent_default_layer(_COLEMAKDH);
-        default_layer_set((layer_state_t)1 << _COLEMAKDH);
+        // set_single_persistent_default_layer(_BASE);
+        default_layer_set((layer_state_t)1 << _BASE);
     }
 };
 
@@ -79,53 +81,50 @@ void tap_dance_layer_tap(tap_dance_state_t *state, void *user_data) {
     }
 };
 
-void tap_dance_layer_nav(tap_dance_state_t *state, void *user_data) {
+void tap_dance_layer_left(tap_dance_state_t *state, void *user_data) {
     if (state->count == 2) {
-        default_layer_set((layer_state_t)1 << _NAV);
+        switch (get_highest_layer(default_layer_state | layer_state)) {
+            case _NAV:
+            case _NUM:
+                default_layer_set((layer_state_t)1 << _NUM);
+                break;
+            case _MOUSE:
+            case _SYM:
+                default_layer_set((layer_state_t)1 << _SYM);
+                break;
+            case _MEDIA:
+            case _FUN:
+                default_layer_set((layer_state_t)1 << _FUN);
+                break;
+        }
     }
 };
-
-void tap_dance_layer_mouse(tap_dance_state_t *state, void *user_data) {
+void tap_dance_layer_right(tap_dance_state_t *state, void *user_data) {
     if (state->count == 2) {
-        default_layer_set((layer_state_t)1 << _MOUSE);
-    }
-};
-
-void tap_dance_layer_media(tap_dance_state_t *state, void *user_data) {
-    if (state->count == 2) {
-        default_layer_set((layer_state_t)1 << _MEDIA);
-    }
-};
-
-void tap_dance_layer_num(tap_dance_state_t *state, void *user_data) {
-    if (state->count == 2) {
-        default_layer_set((layer_state_t)1 << _NUM);
-    }
-};
-
-void tap_dance_layer_sym(tap_dance_state_t *state, void *user_data) {
-    if (state->count == 2) {
-        default_layer_set((layer_state_t)1 << _SYM);
-    }
-};
-
-void tap_dance_layer_fun(tap_dance_state_t *state, void *user_data) {
-    if (state->count == 2) {
-        default_layer_set((layer_state_t)1 << _FUN);
+        switch (get_highest_layer(default_layer_state | layer_state)) {
+            case _NAV:
+            case _NUM:
+                default_layer_set((layer_state_t)1 << _NAV);
+                break;
+            case _MOUSE:
+            case _SYM:
+                default_layer_set((layer_state_t)1 << _MOUSE);
+                break;
+            case _MEDIA:
+            case _FUN:
+                default_layer_set((layer_state_t)1 << _MEDIA);
+                break;
+        }
     }
 };
 
 tap_dance_action_t tap_dance_actions[] = {
     [TD_BOOT] = ACTION_TAP_DANCE_FN (tap_dance_boot),
-    [TD_COLEMAKDH] = ACTION_TAP_DANCE_FN (tap_dance_layer_colemakdh),
+    [TD_BASE] = ACTION_TAP_DANCE_FN (tap_dance_layer_base),
     [TD_QWERTY] = ACTION_TAP_DANCE_FN (tap_dance_layer_qwerty),
     [TD_TAP] = ACTION_TAP_DANCE_FN (tap_dance_layer_tap),
-    [TD_NAV] = ACTION_TAP_DANCE_FN (tap_dance_layer_nav),
-    [TD_MOUSE] = ACTION_TAP_DANCE_FN (tap_dance_layer_mouse),
-    [TD_MEDIA] = ACTION_TAP_DANCE_FN (tap_dance_layer_media),
-    [TD_NUM] = ACTION_TAP_DANCE_FN (tap_dance_layer_num),
-    [TD_SYM] = ACTION_TAP_DANCE_FN (tap_dance_layer_sym),
-    [TD_FUN] = ACTION_TAP_DANCE_FN (tap_dance_layer_fun),
+    [TD_LEFT] = ACTION_TAP_DANCE_FN (tap_dance_layer_left),
+    [TD_RIGHT] = ACTION_TAP_DANCE_FN (tap_dance_layer_right),
 };
 
 /* Mod Tap defs for COLEMAK-DH */
@@ -179,7 +178,7 @@ const key_override_t **key_overrides = (const key_override_t *[]){
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 /* COLEMAK Mod-DH */
-[_COLEMAKDH] = LAYOUT( \
+[_BASE] = LAYOUT( \
   KC_GRV,   KC_1,  KC_2,  KC_3,  KC_4,  KC_5,                     KC_6, KC_7,  KC_8,    KC_9,   KC_0,    KC_MINS, \
   KC_LCBR,  KC_Q,  KC_W,  KC_F,  KC_P,  KC_B,                     KC_J, KC_L,  KC_U,    KC_Y,   KC_QUOT, KC_RCBR, \
   KC_LPRN,  MTG_A, MTA_R, MTC_S, MTS_T, KC_G,                     KC_M, MTS_N, MTC_E,   MTA_I,  MTG_O,   KC_RPRN, \
@@ -196,60 +195,60 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
             KC_LGUI, KC_LALT, LT_ESC, LT_SPC, LT_TAB,     LT_ENT, LT_BSPC, LT_DEL, KC_RALT, KC_RGUI \
 ),
 
-/* COLEMAK Mod-DH without Mod Taps */
+/* QWERTY without mod/taps */
 [_TAP] = LAYOUT( \
-  KC_GRV,         KC_1, KC_2, KC_3, KC_4, KC_5,                     KC_6, KC_7,  KC_8,    KC_9,   KC_0,    KC_MINS, \
-  DF(_COLEMAKDH), KC_Q, KC_W, KC_F, KC_P, KC_B,                     KC_J, KC_L,  KC_U,    KC_Y,   KC_QUOT, KC_SCLN, \
-  KC_LSFT,        KC_A, KC_R, KC_S, KC_T, KC_G,                     KC_M, KC_N,  KC_E,    KC_I,   KC_O,    KC_RSFT, \
-  KC_LCTL,        KC_Z, KC_X, KC_C, KC_D, KC_V, KC_MUTE,   XXXXXXX, KC_K, KC_H,  KC_COMM, KC_DOT, KC_SLSH, KC_RCTL, \
-            KC_LGUI, KC_LALT, KC_ESC, KC_SPC, KC_TAB,         KC_ENT, KC_BSPC, KC_DEL, KC_RALT, KC_RGUI \
+  KC_GRV,    KC_1,  KC_2,  KC_3,  KC_4,  KC_5,                     KC_6, KC_7,  KC_8,    KC_9,   KC_0,    KC_MINS, \
+  DF(_BASE), KC_Q,  KC_W,  KC_E,  KC_R,  KC_T,                     KC_Y, KC_U,  KC_I,    KC_O,   KC_P,    KC_SCLN, \
+  KC_LSFT,   KC_A,  KC_S,  KC_D,  KC_F,  KC_G,                     KC_H, KC_J,  KC_K,    KC_L,   KC_QUOT, KC_RSFT, \
+  KC_LCTL,   KC_Z,  KC_X,  KC_C,  KC_V,  KC_B, KC_MUTE,   XXXXXXX, KC_N, KC_M,  KC_COMM, KC_DOT, KC_SLSH, KC_RCTL, \
+            KC_LGUI, KC_LALT, KC_ESC, KC_SPC, KC_TAB,       KC_ENT, KC_BSPC, KC_DEL, KC_RALT, KC_RGUI \
 ),
 
 [_NAV] = LAYOUT( \
-  XXXXXXX, XXXXXXX,     XXXXXXX,    XXXXXXX,       XXXXXXX,          XXXXXXX,                     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX, \
-  XXXXXXX, TD(TD_BOOT), TD(TD_TAP), TD(TD_QWERTY), TD(TD_COLEMAKDH), CG_TOGG,                     KC_INS,  KC_HOME, KC_PGDN, KC_PGUP, KC_END,   XXXXXXX, \
-  XXXXXXX, KC_LGUI,     KC_LALT,    KC_LCTL,       KC_LSFT,          CW_TOGG,                     CW_TOGG, KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT, XXXXXXX, \
-  XXXXXXX, MO(_BUTTON), XXXXXXX,    TD(TD_NUM),    TD(TD_NAV),       XXXXXXX, KC_MUTE,   XXXXXXX, KC_AGIN, S(KC_INS), C(KC_INS), S(KC_DEL),  KC_UNDO, XXXXXXX, \
-                                      XXXXXXX, XXXXXXX, _______, _______, _______,          KC_ENT, KC_BSPC, KC_DEL, XXXXXXX, XXXXXXX \
+  XXXXXXX, XXXXXXX,     XXXXXXX,    XXXXXXX,       XXXXXXX,      XXXXXXX,                     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX, \
+  XXXXXXX, TD(TD_BOOT), TD(TD_TAP), TD(TD_QWERTY), TD(TD_BASE),  CG_TOGG,                     KC_INS,  KC_HOME, KC_PGDN, KC_PGUP, KC_END,   XXXXXXX, \
+  XXXXXXX, KC_LGUI,     KC_LALT,    KC_LCTL,       KC_LSFT,      CW_TOGG,                     CW_TOGG, KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT, XXXXXXX, \
+  XXXXXXX, MO(_BUTTON), XXXXXXX,    TD(TD_LEFT),   TD(TD_RIGHT), XXXXXXX, KC_MUTE,   XXXXXXX, KC_AGIN, S(KC_INS), C(KC_INS), S(KC_DEL),  KC_UNDO, XXXXXXX, \
+                                XXXXXXX, XXXXXXX, _______, _______, _______,          KC_ENT, KC_BSPC, KC_DEL, XXXXXXX, XXXXXXX \
 ),
 
 [_MOUSE] = LAYOUT( \
-  XXXXXXX, XXXXXXX,     XXXXXXX,    XXXXXXX,       XXXXXXX,          XXXXXXX,                     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
-  XXXXXXX, TD(TD_BOOT), TD(TD_TAP), TD(TD_QWERTY), TD(TD_COLEMAKDH), CG_TOGG,                     XXXXXXX, KC_WH_L, KC_WH_D, KC_WH_U, KC_WH_R, XXXXXXX, \
-  XXXXXXX, KC_LGUI,     KC_LALT,    KC_LCTL,       KC_LSFT,          CW_TOGG,                     XXXXXXX, KC_MS_L, KC_MS_D, KC_MS_U, KC_MS_R, XXXXXXX, \
-  XXXXXXX, MO(_BUTTON), XXXXXXX,    TD(TD_SYM),    TD(TD_MOUSE),     XXXXXXX, KC_MUTE,   XXXXXXX, KC_AGIN, S(KC_INS), C(KC_INS), S(KC_DEL),  KC_UNDO, XXXXXXX, \
+  XXXXXXX, XXXXXXX,     XXXXXXX,    XXXXXXX,       XXXXXXX,      XXXXXXX,                     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, TD(TD_BOOT), TD(TD_TAP), TD(TD_QWERTY), TD(TD_BASE),  CG_TOGG,                     XXXXXXX, KC_WH_L, KC_WH_D, KC_WH_U, KC_WH_R, XXXXXXX, \
+  XXXXXXX, KC_LGUI,     KC_LALT,    KC_LCTL,       KC_LSFT,      CW_TOGG,                     XXXXXXX, KC_MS_L, KC_MS_D, KC_MS_U, KC_MS_R, XXXXXXX, \
+  XXXXXXX, MO(_BUTTON), XXXXXXX,    TD(TD_LEFT),   TD(TD_RIGHT), XXXXXXX, KC_MUTE,   XXXXXXX, KC_AGIN, S(KC_INS), C(KC_INS), S(KC_DEL),  KC_UNDO, XXXXXXX, \
                                       XXXXXXX, XXXXXXX, KC_BTN3, KC_BTN1, KC_BTN2,          KC_BTN2, KC_BTN1, KC_BTN3, XXXXXXX, XXXXXXX \
 ),
 
 [_MEDIA] = LAYOUT( \
-  XXXXXXX, XXXXXXX,     XXXXXXX,    XXXXXXX,       XXXXXXX,          XXXXXXX,                     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
-  XXXXXXX, TD(TD_BOOT), TD(TD_TAP), TD(TD_QWERTY), TD(TD_COLEMAKDH), CG_TOGG,                     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
-  XXXXXXX, KC_LGUI,     KC_LALT,    KC_LCTL,       KC_LSFT,          CW_TOGG,                     KC_MPRV, KC_VOLD, KC_VOLU, KC_MNXT, XXXXXXX, XXXXXXX, \
-  XXXXXXX, MO(_BUTTON), XXXXXXX,    TD(TD_FUN),    TD(TD_MEDIA),     XXXXXXX, KC_MUTE,   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, XXXXXXX,     XXXXXXX,    XXXXXXX,       XXXXXXX,      XXXXXXX,                     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, TD(TD_BOOT), TD(TD_TAP), TD(TD_QWERTY), TD(TD_BASE),  CG_TOGG,                     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
+  XXXXXXX, KC_LGUI,     KC_LALT,    KC_LCTL,       KC_LSFT,      CW_TOGG,                     KC_MPRV, KC_VOLD, KC_VOLU, KC_MNXT, XXXXXXX, XXXXXXX, \
+  XXXXXXX, MO(_BUTTON), XXXXXXX,    TD(TD_LEFT),   TD(TD_RIGHT), XXXXXXX, KC_MUTE,   XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
                                       XXXXXXX, XXXXXXX, _______, _______, _______,          KC_MSTP, KC_MPLY, KC_MUTE, XXXXXXX, XXXXXXX \
 ),
 
 [_NUM] = LAYOUT( \
-  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,            XXXXXXX, XXXXXXX,          XXXXXXX,       XXXXXXX,    XXXXXXX,     XXXXXXX,  \
-  XXXXXXX, KC_LBRC, KC_7, KC_8, KC_9, KC_RBRC,                     CG_TOGG, TD(TD_COLEMAKDH), TD(TD_QWERTY), TD(TD_TAP), TD(TD_BOOT), XXXXXXX, \
-  XXXXXXX, KC_SCLN, KC_4, KC_5, KC_6, KC_EQL,                      CW_TOGG, KC_RSFT,          KC_RCTL,       KC_LALT,    KC_RGUI,     XXXXXXX, \
-  XXXXXXX, KC_GRV, KC_1, KC_2, KC_3, KC_NUBS, KC_MUTE,    XXXXXXX, XXXXXXX, TD(TD_NUM),       TD(TD_NAV),    KC_RALT,    MO(_BUTTON), XXXXXXX, \
-            KC_ENTER, KC_TAB, KC_DOT, KC_0, KC_MINS,          _______, _______, _______, XXXXXXX, XXXXXXX \
+  XXXXXXX, KC_BSPC, KC_SLSH, KC_ASTR, KC_PLUS, KC_MINS,                      XXXXXXX, XXXXXXX,     XXXXXXX,       XXXXXXX,    XXXXXXX,     XXXXXXX,  \
+  KC_TAB,  KC_LBRC, KC_7,    KC_8,    KC_9,    KC_RBRC,                      CG_TOGG, TD(TD_BASE), TD(TD_QWERTY), TD(TD_TAP), TD(TD_BOOT), XXXXXXX, \
+  KC_ENT,  KC_SCLN, KC_4,    KC_5,    KC_6,    KC_EQL,                       CW_TOGG, KC_RSFT,     KC_RCTL,       KC_LALT,    KC_RGUI,     XXXXXXX, \
+  XXXXXXX, KC_GRV,  KC_1,    KC_2,    KC_3,    KC_NUBS, KC_MUTE,    XXXXXXX, XXXXXXX, TD(TD_LEFT), TD(TD_RIGHT),  KC_RALT,    MO(_BUTTON), XXXXXXX, \
+            KC_TAB, KC_ENTER, KC_DOT, KC_0,    KC_MINS,          _______, _______, _______, XXXXXXX, XXXXXXX \
 ),
 
 [_SYM] = LAYOUT( \
-  XXXXXXX,   XXXXXXX,    XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                        XXXXXXX, XXXXXXX,          XXXXXXX,       XXXXXXX,    XXXXXXX,     XXXXXXX, \
-  XXXXXXX,   S(KC_LBRC), S(KC_7), S(KC_8), S(KC_9), S(KC_RBRC),                     CG_TOGG, TD(TD_COLEMAKDH), TD(TD_QWERTY), TD(TD_TAP), TD(TD_BOOT), XXXXXXX, \
-  XXXXXXX,   S(KC_SCLN), S(KC_4), S(KC_5), S(KC_6), S(KC_EQL),                      CW_TOGG, KC_RSFT,          KC_RCTL,       KC_LALT,    KC_RGUI,     XXXXXXX, \
-  XXXXXXX,   S(KC_NUHS), S(KC_1), S(KC_QUOT), S(KC_3), S(KC_NUBS), KC_MUTE,   XXXXXXX, XXXXXXX, TD(TD_SYM),       TD(TD_MOUSE),  KC_RALT,  MO(_BUTTON),   XXXXXXX, \
+  XXXXXXX,   XXXXXXX,    XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                           XXXXXXX, XXXXXXX,       XXXXXXX,       XXXXXXX,    XXXXXXX,     XXXXXXX, \
+  XXXXXXX,   S(KC_LBRC), S(KC_7), S(KC_8), S(KC_9), S(KC_RBRC),                        CG_TOGG, TD(TD_BASE),   TD(TD_QWERTY), TD(TD_TAP), TD(TD_BOOT), XXXXXXX, \
+  XXXXXXX,   S(KC_SCLN), S(KC_4), S(KC_5), S(KC_6), S(KC_EQL),                         CW_TOGG, KC_RSFT,       KC_RCTL,       KC_LALT,    KC_RGUI,     XXXXXXX, \
+  XXXXXXX,   S(KC_NUHS), S(KC_1), S(KC_QUOT), S(KC_3), S(KC_NUBS), KC_MUTE,   XXXXXXX, XXXXXXX, TD(TD_LEFT),   TD(TD_RIGHT),  KC_RALT,    MO(_BUTTON), XXXXXXX, \
                   XXXXXXX, XXXXXXX, KC_NUHS, S(KC_0), S(KC_MINS),          _______, _______, _______, XXXXXXX, XXXXXXX \
 ),
 
 [_FUN] = LAYOUT( \
-  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                     XXXXXXX, XXXXXXX,          XXXXXXX,       XXXXXXX,    XXXXXXX,     XXXXXXX, \
-  XXXXXXX, KC_F12,  KC_F7,   KC_F8,   KC_F9,   KC_PSCR,                     CG_TOGG, TD(TD_COLEMAKDH), TD(TD_QWERTY), TD(TD_TAP), TD(TD_BOOT), XXXXXXX, \
-  XXXXXXX, KC_F11,  KC_F4,   KC_F5,   KC_F6,   KC_SCRL,                     CW_TOGG, KC_RSFT,          KC_RCTL,       KC_LALT,    KC_RGUI,     XXXXXXX, \
-  XXXXXXX, KC_F10,  KC_F1,   KC_F2,   KC_F3,   KC_PAUS, KC_MUTE,   XXXXXXX, XXXXXXX, TD(TD_FUN),       TD(TD_MEDIA),  KC_RALT,    MO(_BUTTON), XXXXXXX, \
+  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                     XXXXXXX, XXXXXXX,     XXXXXXX,       XXXXXXX,    XXXXXXX,     XXXXXXX, \
+  XXXXXXX, KC_F12,  KC_F7,   KC_F8,   KC_F9,   KC_PSCR,                     CG_TOGG, TD(TD_BASE), TD(TD_QWERTY), TD(TD_TAP), TD(TD_BOOT), XXXXXXX, \
+  XXXXXXX, KC_F11,  KC_F4,   KC_F5,   KC_F6,   KC_SCRL,                     CW_TOGG, KC_RSFT,     KC_RCTL,       KC_LALT,    KC_RGUI,     XXXXXXX, \
+  XXXXXXX, KC_F10,  KC_F1,   KC_F2,   KC_F3,   KC_PAUS, KC_MUTE,   XXXXXXX, XXXXXXX, TD(TD_LEFT), TD(TD_RIGHT),  KC_RALT,    MO(_BUTTON), XXXXXXX, \
                   XXXXXXX, XXXXXXX, KC_APP, KC_SPC, KC_TAB,          _______, _______, _______, XXXXXXX, XXXXXXX \
 ),
 
@@ -265,30 +264,37 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 #ifdef OLED_ENABLE
 
-static void print_status_wide(void) {
+static void print_status(void) {
 
-    oled_write_ln_P(PSTR(""), false);
+    if ( get_highest_layer(default_layer_state) <= _TAP) {
 
-    // Capslock indicator
-    led_t led_usb_state = host_keyboard_led_state();
-    oled_write_P(PSTR(" CAPS "), led_usb_state.caps_lock);
+        oled_set_cursor(0, 1);
+        oled_write_ln_P(PSTR("Mode "), false);
 
-    // Print current mode
-    if (keymap_config.swap_lctl_lgui) {
-        oled_write_P(PSTR(" MAC "), false);
-    } else {
-        oled_write_P(PSTR(" WIN "), false);
+        switch (get_highest_layer(default_layer_state)) {
+            case _BASE:
+                oled_write_ln_P(PSTR("COLE"), false);
+                break;
+            case _QWERTY:
+            case _TAP:
+                oled_write_ln_P(PSTR("QWER"), false);
+                break;
+        }
+
+        if (keymap_config.swap_lctl_lgui) {
+            oled_write_ln_P(PSTR("MAC"), false);
+        } else {
+            oled_write_ln_P(PSTR("WIN"), false);
+        }
     }
 
-    // Show current layer
+    oled_set_cursor(0, 8);
+    oled_write_ln_P(PSTR("Layer"), false);
+
     switch (get_highest_layer(default_layer_state | layer_state)) {
-        case _COLEMAKDH:
-            oled_write_ln_P(PSTR("BASE"), false);
-            oled_write_P(PSTR("\n COLEMAK-DH"), false);
-            break;
+        case _BASE:
         case _QWERTY:
-            oled_write_ln_P(PSTR("BASE"), true);
-            oled_write_P(PSTR("\n QWERTY"), true);
+            oled_write_ln_P(PSTR("BASE"), false);
             break;
         case _TAP:
             oled_write_ln_P(PSTR("TAP"), true);
@@ -315,16 +321,19 @@ static void print_status_wide(void) {
             oled_write_ln_P(PSTR("BTN"), true);
             break;
         default:
-            oled_write_ln_P(PSTR("DEF"), true);
+            oled_write_ln_P(PSTR("OTHER"), true);
+
     }
+
+    oled_set_cursor(0, 14);
+
+    // Capslock indicator
+    led_t led_usb_state = host_keyboard_led_state();
+    oled_write_P(PSTR("CAPS"), led_usb_state.caps_lock);
 }
 
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-    if (is_keyboard_left()) {
-        return OLED_ROTATION_0;
-    } else {
-        return OLED_ROTATION_270;
-    }
+    return OLED_ROTATION_270;
 }
 
 // Remove all the animation to save space - but don't reflash the right half and it will still work!
@@ -456,7 +465,7 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
 
 bool oled_task_user(void) {
     if (is_keyboard_left()) {
-        print_status_wide();
+        print_status();
     // } else {
     //     render_anim();
     //     oled_set_cursor(1,12);
@@ -565,10 +574,10 @@ static uint32_t       last_mouse_activity = 0;
 static report_mouse_t last_mouse_report   = {0};
 static bool           trackball_scrolling = false;
 
-void pointing_device_init_user(void) {
-    set_auto_mouse_layer(_BUTTON);
-    set_auto_mouse_enable(true);
-}
+// void pointing_device_init_user(void) {
+//     set_auto_mouse_layer(_BUTTON);
+//     set_auto_mouse_enable(true);
+// }
 
 report_mouse_t smooth_mouse_movement(report_mouse_t mouse_report) {
 
@@ -588,21 +597,9 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
     mouse_report = smooth_mouse_movement(mouse_report);
 
     if (trackball_scrolling) {
-        mouse_report.h = -0.3*mouse_report.x;
-        mouse_report.v = 0.3*mouse_report.y;
+        mouse_report.h = -0.2*mouse_report.x;
+        mouse_report.v = 0.2*mouse_report.y;
         mouse_report.x = mouse_report.y = 0;
-
-    // // setting pimoroni trackball led state doesn't work
-    // // and causes big lag with split pointing (i.e. trackball
-    // // on right half but left is master)
-    // pimoroni_trackball_set_rgbw(50,0,0,0);
-    // } else {
-    //     if (timer_elapsed(last_mouse_activity) < TRACKBALL_LED_TIMEOUT) {
-    //         pimoroni_trackball_set_rgbw(0,0,50,0);
-
-    //     } else {
-    //         pimoroni_trackball_set_rgbw(0,0,0,0);
-    //     }
     }
 
     return mouse_report;
@@ -613,11 +610,11 @@ layer_state_t layer_state_set_user(layer_state_t layer_state) {
     switch (get_highest_layer(layer_state)) {
         case _NAV:
         case _MOUSE:
-            set_auto_mouse_enable(false);
+            // set_auto_mouse_enable(false);
             trackball_scrolling = true;
             break;
         default:
-            set_auto_mouse_enable(true);
+            // set_auto_mouse_enable(true);
             trackball_scrolling = false;
     }
 
