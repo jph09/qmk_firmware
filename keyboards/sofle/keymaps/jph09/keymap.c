@@ -403,9 +403,9 @@ static void print_status(void) {
     oled_set_cursor(5, 1);
 
     if ( default_layer_state & ((layer_state_t)1<<_QWE) ) {
-        oled_write_P(PSTR("QWERTY"), false);
+        oled_write_ln_P(PSTR("QWERTY"), false);
     } else {
-        oled_write_P(PSTR("Colemak-DH"), false);
+        oled_write_ln_P(PSTR("Colemak-DH"), false);
     }
 
     oled_set_cursor(1, 3);
