@@ -25,6 +25,7 @@
 #define POINTING_DEVICE_ROTATION_90
 #define POINTING_DEVICE_TASK_THROTTLE_MS 8
 #define TRACKBALL_LED_TIMEOUT 3000 // time in milliseconds
+#define POINTING_DEVICE_AUTO_MOUSE_ENABLE
 
 /* OLED options */
 #define SPLIT_OLED_ENABLE
@@ -47,14 +48,10 @@
 #undef MOUSEKEY_TIME_TO_MAX
 #define MOUSEKEY_TIME_TO_MAX    64
 
-/* Mod Tap */
-#undef TAPPING_TERM
-#define TAPPING_TERM 220 // Configure the global tapping term (default: 200ms)
-#define IGNORE_MOD_TAP_INTERRUPT // Prevent normal rollover on alphas from accidentally triggering mods.
-#define QUICK_TAP_TERM 0 // Enable rapid switch from tap to hold, disables double tap hold auto-repeat.
+// Oneshot options
+#define ONESHOT_TAP_TOGGLE 2
 
 // Saving space
-#define NO_ACTION_ONESHOT
-#define NO_MUSIC_MODE
+// #define NO_ACTION_TAPPING
 #undef LOCKING_SUPPORT_ENABLE
 #undef LOCKING_RESYNC_ENABLE
