@@ -32,7 +32,7 @@ enum sofle_layers {
 //     KC_RDO
 //     KC_CPY,
 //     KC_PST,
-     KC_SCROLLING,
+    KC_SCROLLING,
  };
 
 /* Safety Tap Dance on special functions */
@@ -71,7 +71,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   XXXXXXX, KC_Q,    KC_W,    KC_F,    KC_P,    KC_B,                        KC_J,    KC_L,    KC_U,    KC_Y,    KC_QUOT, XXXXXXX, \
   XXXXXXX, KC_A,    KC_R,    KC_S,    KC_T,    KC_G,                        KC_M,    KC_N,    KC_E,    KC_I,    KC_O,    XXXXXXX, \
   XXXXXXX, KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,    KC_MUTE,   XXXXXXX, KC_K,    KC_H,    KC_COMM, KC_DOT,  KC_SLSH, XXXXXXX, \
-                 XXXXXXX, XXXXXXX, KC_MINS, OSL(_NAV),  KC_SPC,    OSM(MOD_LSFT),  OSL(_NUM), XXXXXXX, XXXXXXX, XXXXXXX \
+                  XXXXXXX, XXXXXXX, KC_MINS, TT(_NAV),  KC_SPC,    OSM(MOD_LSFT),  TT(_NUM), XXXXXXX, XXXXXXX, XXXXXXX \
 ),
 
 [_NUM] = LAYOUT( \
@@ -107,6 +107,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 };
+
+layer_state_t layer_state_set_user(layer_state_t state) {
+  return update_tri_layer_state(state, _NUM, _NAV, _FUN);
+}
+
+#ifdef POINTING_DEVICE_ENABLE
+static bool           trackball_scrolling = false;
+#endif
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
@@ -180,7 +188,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             break;
 
         case KC_SCROLLING:
-            // TODO: Toggle trackball scrolling
+            #ifdef POINTING_DEVICE_ENABLE
+            if (record->event.pressed) {
+                trackball_scrolling = ! trackball_scrolling ;
+            }
+            #endif
+
             return false;
             break;
 
@@ -214,17 +227,11 @@ static void print_status(void) {
     } else {
         oled_write_P(PSTR("Win"), false);
     }
-
-    oled_set_cursor(5, 1);
-    oled_write_ln_P(PSTR("Colemak-DH"), false);
     
 
     oled_set_cursor(1, 3);
 
-    switch (get_highest_layer(default_layer_state | layer_state)) {
-        case _BASE:
-            oled_write_P(PSTR("   "), false);
-            break;
+    switch (get_highest_layer(layer_state)) {
         case _NAV:
             oled_write_P(PSTR("NAV"), true);
             break;
@@ -238,7 +245,7 @@ static void print_status(void) {
             oled_write_P(PSTR("FUN"), true);
             break;
         default:
-            oled_write_P(PSTR("???"), true);
+            oled_write_P(PSTR("   "), true);
 
     }
 
@@ -246,17 +253,19 @@ static void print_status(void) {
 
     // Capslock indicator
     led_t led_usb_state = host_keyboard_led_state();
-    oled_write_P(PSTR("CAPS"), led_usb_state.caps_lock);
-
-}
-
-oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-    if (is_keyboard_master()) {
-        return OLED_ROTATION_0;
-    } else {
-        return OLED_ROTATION_270;
+    if (led_usb_state.caps_lock) {
+        oled_write_P(PSTR("CAPS"), false);
     }
+
 }
+
+// oled_rotation_t oled_init_user(oled_rotation_t rotation) {
+//     if (is_keyboard_master()) {
+//         return OLED_ROTATION_0;
+//     } else {
+//         return OLED_ROTATION_270;
+//     }
+// }
 
 // /* Animation bit by j-inc https://github.com/qmk/qmk_firmware/tree/master/keyboards/kyria/keymaps/j-inc */
 // // WPM-responsive animation stuff here
@@ -383,22 +392,20 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
 // }
 
 bool oled_task_user(void) {
-    if (is_keyboard_master()) {
+    // if (is_keyboard_master()) {
         print_status();
-    } else {
-        // render_anim();
-        oled_set_cursor(1,12);
-        oled_write_P(PSTR("WPM"), false);
-        oled_set_cursor(1,13);
-        oled_write(get_u8_str(get_current_wpm(), '0'), false);
-    }
+    // } else {
+    //     render_anim();
+    //     oled_set_cursor(1,12);
+    //     oled_write_P(PSTR("WPM"), false);
+    //     oled_set_cursor(1,13);
+    //     oled_write(get_u8_str(get_current_wpm(), '0'), false);
+    // }
     return false;
 }
 #endif
 
 #ifdef POINTING_DEVICE_ENABLE
-
-static bool           trackball_scrolling = false;
 
 static uint32_t       last_mouse_activity = 0;
 static report_mouse_t last_mouse_report   = {0};

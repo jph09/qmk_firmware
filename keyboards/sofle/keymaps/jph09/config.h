@@ -49,6 +49,7 @@
 #define MOUSEKEY_TIME_TO_MAX    64
 
 // Oneshot options
+#define TAPPING_TOGGLE 2
 #define ONESHOT_TAP_TOGGLE 2
 
 // Saving space
