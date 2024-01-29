@@ -21,7 +21,7 @@
 
 enum sofle_layers {
     _BASE = 0,
-    _NUM,
+    _SYM,
     _NAV,
     _FUN,
     _MOU,
@@ -34,6 +34,27 @@ enum sofle_layers {
 //     KC_PST,
     KC_SCROLLING,
  };
+
+// Abbreviations for one-shots
+#define OSMLGUI OSM(MOD_LGUI)
+#define OSMLALT OSM(MOD_LALT)
+#define OSMLCTL OSM(MOD_LCTL)
+#define OSMLSFT OSM(MOD_LSFT)
+#define OSMRSFT OSM(MOD_RSFT)
+#define OSMRCTL OSM(MOD_RCTL)
+#define OSMRALT OSM(MOD_RALT)
+#define OSMRGUI OSM(MOD_RGUI)
+
+// Extra aliases for ISO UK keys
+#define KC_GBP S(KC_3)      // Pound sign
+#define KC_EUR RALT(KC_4)   // Euro sign
+#define KC_NUDQ S(KC_2)     // Non-US Double Quote
+#define KC_NUAT S(KC_QUOT)  // Non-US At sign
+
+// Custom cut/copy/paste
+#define KC_CUT S(KC_DEL)
+#define KC_COPY C(KC_INS)
+#define KC_PSTE S(KC_INS)
 
 /* Safety Tap Dance on special functions */
 enum {
@@ -51,15 +72,19 @@ tap_dance_action_t tap_dance_actions[] = {
 };
 
 /* Override shifted keys */
-const key_override_t ko_capsword = ko_make_basic(MOD_MASK_SHIFT, CW_TOGG, KC_CAPS);
 const key_override_t ko_scln = ko_make_basic(MOD_MASK_SHIFT, KC_COMM, KC_SCLN);
-const key_override_t ko_cln = ko_make_basic(MOD_MASK_SHIFT, KC_DOT, S(KC_SCLN));
-const key_override_t ko_non_us_quot = ko_make_basic(MOD_MASK_SHIFT, KC_QUOT, S(KC_2));
+const key_override_t ko_cln = ko_make_basic(MOD_MASK_SHIFT, KC_DOT, KC_COLN);
+const key_override_t ko_non_us_dquo = ko_make_basic(MOD_MASK_SHIFT, KC_QUOT, KC_NUDQ);
+const key_override_t ko_non_us_at = ko_make_basic(MOD_MASK_SHIFT, KC_2, KC_NUAT);
+const key_override_t ko_labk = ko_make_basic(MOD_MASK_SHIFT, KC_LPRN, KC_LABK);
+const key_override_t ko_rabk = ko_make_basic(MOD_MASK_SHIFT, KC_RPRN, KC_RABK);
 const key_override_t **key_overrides = (const key_override_t *[]){
-    &ko_capsword,
     &ko_scln,
     &ko_cln,
-    &ko_non_us_quot,
+    &ko_non_us_dquo,
+    &ko_non_us_at,
+    &ko_labk,
+    &ko_rabk,
     NULL
 };
 
@@ -67,49 +92,49 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 /* COLEMAK Mod-DH */
 [_BASE] = LAYOUT( \
-  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, \
-  XXXXXXX, KC_Q,    KC_W,    KC_F,    KC_P,    KC_B,                        KC_J,    KC_L,    KC_U,    KC_Y,    KC_QUOT, XXXXXXX, \
-  XXXXXXX, KC_A,    KC_R,    KC_S,    KC_T,    KC_G,                        KC_M,    KC_N,    KC_E,    KC_I,    KC_O,    XXXXXXX, \
-  XXXXXXX, KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,    KC_MUTE,   XXXXXXX, KC_K,    KC_H,    KC_COMM, KC_DOT,  KC_SLSH, XXXXXXX, \
-                  XXXXXXX, XXXXXXX, KC_MINS, TT(_NAV),  KC_SPC,    OSM(MOD_LSFT),  TT(_NUM), XXXXXXX, XXXXXXX, XXXXXXX \
+  KC_GRV,  KC_7,    KC_5,    KC_3,    KC_1,    KC_9,                          KC_8,    KC_0,    KC_2,    KC_4,    KC_6,    KC_EQL, \
+  KC_ESC,  KC_Q,    KC_W,    KC_F,    KC_P,    KC_B,                          KC_J,    KC_L,    KC_U,    KC_Y,    KC_MINS, KC_DEL, \
+  KC_TAB,  KC_A,    KC_R,    KC_S,    KC_T,    KC_G,                          KC_M,    KC_N,    KC_E,    KC_I,    KC_O,    KC_BSPC, \
+  KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,    KC_MUTE,     XXXXXXX, KC_K,    KC_H,    KC_COMM, KC_DOT,  KC_QUOT, KC_ENT, \
+                   KC_LCTL, KC_LGUI, KC_LALT, MO(_NAV), OSMLSFT,     KC_SPC, MO(_SYM), KC_RALT, KC_APP, KC_RCTL \
 ),
 
-[_NUM] = LAYOUT( \
-  _______, _______, _______, _______, _______, _______,                        _______,    _______, _______, _______, _______, _______, \
-  _______, KC_GRV,  KC_EXLM, KC_DQUO, KC_CIRC, KC_AMPR,                        KC_EQL,     KC_MINS, KC_PLUS, KC_ASTR, KC_NUBS, _______, \
-  _______, KC_7,    KC_5,    KC_3,    KC_1,    KC_9,                           KC_8,       KC_0,    KC_2,    KC_4,    KC_6,    _______, \
-  _______, KC_PIPE, KC_PERC, KC_HASH, KC_DLR,  RALT(KC_4), _______,   _______, S(KC_NUBS), KC_NUHS, KC_COMM, KC_DOT,  KC_SLSH, _______, \
-                    _______, _______, KC_UNDS, _______,    KC_TAB,    KC_ENT,  _______, _______, _______, _______ \
-),
+[_SYM] = LAYOUT( \
+  _______, _______, _______, _______, _______, _______,                       _______, _______, _______, _______, _______, _______, \
+  _______, KC_EUR,  KC_DLR,  KC_GBP,  KC_EXLM, KC_QUES,                       KC_EQL,  KC_ASTR, KC_SLSH, KC_PLUS, _______, _______, \
+  _______, KC_7,    KC_5,    KC_3,    KC_1,    KC_9,                          KC_8,    KC_0,    KC_2,    KC_4,    KC_6,    _______, \
+  _______, KC_NUBS, KC_NUHS, KC_NUAT, KC_LBRC, KC_LPRN, _______,     _______, KC_RPRN, KC_RBRC, _______, _______, KC_GRV, _______, \
+                    _______, _______, _______, _______, _______,     _______, _______, _______, _______, _______ \
+), /* missing (without mods): KC_PERC, KC_CIRC, KC_AMPR, S(KC_NUBS), S(KC_NUHS), S(KC_GRV), RALT(KC_GRV), KC_LCBR, KC_RCBR, KC_LABK, KC_RABK */
 
 [_NAV] = LAYOUT( \
-  _______, _______,       _______,       _______,       _______,       _______,                      _______, _______, _______, _______, _______,  _______, \
-  _______, KC_LABK,       KC_LCBR,       KC_LBRC,       KC_LPRN,       KC_AGIN,                      KC_UNDO, KC_HOME, KC_PGDN, KC_PGUP, KC_END,   _______, \
-  _______, OSM(MOD_LGUI), OSM(MOD_LALT), OSM(MOD_LCTL), OSM(MOD_LSFT), KC_APP,                       KC_TAB,  KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT, _______, \
-  _______, KC_RABK,       KC_RCBR,       KC_RBRC,       KC_RPRN,       KC_SPC,  _______,    _______, KC_SPC,  KC_ESC,  KC_BSPC, KC_DEL,  KC_INS,   _______, \
-                                           _______, _______,  KC_UNDS, _______, _______,    KC_ENT,  _______, XXXXXXX, XXXXXXX, XXXXXXX \
+  _______, _______, _______, _______, _______, _______,                      _______, _______, _______, _______, _______,  _______, \
+  _______, XXXXXXX, XXXXXXX, XXXXXXX, KC_APP,  KC_ESC,                       KC_DEL,  KC_SCRL, KC_PSCR, KC_PAUS, KC_INS,   _______, \
+  _______, OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_TAB,                       KC_BSPC, KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT, _______, \
+  _______, KC_UNDO, KC_CUT,  KC_COPY, KC_PSTE, KC_AGIN, _______,    _______, KC_ENT,  KC_HOME, KC_PGDN, KC_PGUP, KC_END,   _______, \
+                   _______, _______,  _______, _______, _______,    _______, _______, _______, _______, _______ \
 ),
 
 [_FUN] = LAYOUT( \
-  _______, _______,       _______,       _______,       _______,       _______,                      _______, _______,       _______,       _______,       _______,       _______, \
-  _______, KC_F1,         KC_F2,         KC_F3,         KC_F4,         KC_F5,                        KC_F6,   KC_F7,         KC_F8,         KC_F9,         KC_F10,        _______, \
-  _______, OSM(MOD_LGUI), OSM(MOD_LALT), OSM(MOD_LCTL), OSM(MOD_LSFT), CW_TOGG,                      KC_PAUS, OSM(MOD_RSFT), OSM(MOD_RCTL), OSM(MOD_RALT), OSM(MOD_RGUI), _______, \
-  _______, KC_PSCR,       KC_SCROLLING,  KC_MS_BTN2,    KC_MS_BTN1,    KC_SCRL, _______,    _______, KC_MUTE, KC_VOLD,       KC_VOLU,       KC_F11,        KC_F12,        _______, \
-                                        _______, _______, TD(TD_BOOT), _______, CG_TOGG,    _______, _______, _______, _______, _______ \
+  _______, _______, _______, _______, _______, _______,                          _______, _______, _______, _______, _______, _______, \
+  _______, KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                            KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  _______, \
+  _______, OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_F11,                           KC_F12,  OSMRSFT, OSMRCTL, OSMRALT, OSMRGUI, _______, \
+  _______, CG_TOGG, XXXXXXX, XXXXXXX, KC_CAPS, TD(TD_BOOT), _______,    _______, XXXXXXX, KC_MUTE, KC_VOLD, KC_VOLU, KC_MPLY, _______, \
+                        _______, _______, _______, _______, _______,    _______, _______, _______, _______, _______ \
 ),
 
 [_MOU] = LAYOUT( \
-  _______, _______, _______,      _______,    _______,    _______,                       _______, _______, _______, _______, _______, _______, \
-  _______, _______, _______,      _______,    _______,    _______,                       _______, _______, _______, _______, _______, _______, \
-  _______, _______, _______,      _______,    _______,    _______,                       _______, _______, _______, _______, _______, _______, \
-  _______, _______, KC_SCROLLING, KC_MS_BTN2, KC_MS_BTN1, _______, _______,     _______, _______, _______, _______, _______, _______, _______, \
-                               _______, _______, _______, _______, _______,     _______, _______, _______, _______, _______ \
+  _______, _______, _______, _______, _______, _______,                       _______, _______, _______, _______, _______, _______, \
+  _______, _______, _______, _______, _______, _______,                       _______, _______, _______, _______, _______, _______, \
+  _______, OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_SCROLLING,             KC_SCROLLING, OSMRSFT, OSMRCTL, OSMRALT, OSMRGUI, _______, \
+  _______, _______, _______, _______, _______, _______, _______,     _______, _______, _______, _______, _______, _______, _______, \
+           _______, _______, KC_MS_BTN3, KC_MS_BTN2, KC_MS_BTN1,     KC_MS_BTN1, KC_MS_BTN2, KC_MS_BTN3, _______, _______ \
 ),
 
 };
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-  return update_tri_layer_state(state, _NUM, _NAV, _FUN);
+  return update_tri_layer_state(state, _SYM, _NAV, _FUN);
 }
 
 #ifdef POINTING_DEVICE_ENABLE
@@ -119,39 +144,49 @@ static bool           trackball_scrolling = false;
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         // case KC_CUT:
-        //     // may be better to use Shift+Del to work anywhere (e.g. linux terminal)
-        //     // need to test on macOS
+        // //     // may be better to use Shift+Del to work anywhere (e.g. linux terminal)
+        // //     // need to test on macOS
         //     if (record->event.pressed) {
-        //         // cmd on macOS but CW_TOGG swaps this
-        //         register_mods(mod_config(MOD_LCTL));
-        //         register_code(KC_X);
+        // //         // cmd on macOS but CG_TOGG swaps this
+        // //         register_mods(mod_config(MOD_LCTL));
+        // //         register_code(KC_X);
+        //         register_mods(mod_config(MOD_LSFT));
+        //         register_code(KC_DEL);
         //     } else {
-        //         unregister_mods(mod_config(MOD_LCTL));
-        //         unregister_code(KC_X);
+        // //         unregister_mods(mod_config(MOD_LCTL));
+        // //         unregister_code(KC_X);
+        //         unregister_mods(mod_config(MOD_LSFT));
+        //         unregister_code(KC_DEL);
         //     }
         //     return false;
         //     break;
         // case KC_COPY:
-        //     // may be better to use Ctrl+Ins to work anywhere (e.g. linux terminal)
-        //     // need to test on macOS
+        // //     // may be better to use Ctrl+Ins to work anywhere (e.g. linux terminal)
+        // //     // need to test on macOS
         //     if (record->event.pressed) {
         //         register_mods(mod_config(MOD_LCTL));
-        //         register_code(KC_C);
+        // //         register_code(KC_C);
+        //         register_code(KC_INS);
         //     } else {
         //         unregister_mods(mod_config(MOD_LCTL));
-        //         unregister_code(KC_C);
+        // //         unregister_code(KC_C);
+        //         unregister_code(KC_INS);
         //     }
         //     return false;
         //     break;
         // case KC_PASTE:
-        //     // may be better to use Shift+Ins to work anywhere (e.g. linux terminal)
-        //     // need to test on macOS
+        // //     // may be better to use Shift+Ins to work anywhere (e.g. linux terminal)
+        // //     // need to test on macOS
         //     if (record->event.pressed) {
-        //         register_mods(mod_config(MOD_LCTL));
-        //         register_code(KC_V);
+        // //         register_mods(mod_config(MOD_LCTL));
+        // //         register_code(KC_V);
+        //         register_mods(mod_config(MOD_LSFT));
+        //         register_code(KC_INS);
         //     } else {
-        //         unregister_mods(mod_config(MOD_LCTL));
-        //         unregister_code(KC_V);
+        // //         unregister_mods(mod_config(MOD_LCTL));
+        // //         unregister_code(KC_V);
+        //         unregister_mods(mod_config(MOD_LSFT));
+        //         unregister_code(KC_INS);
         //     }
         //     return false;
         //     break;
@@ -227,45 +262,53 @@ static void print_status(void) {
     } else {
         oled_write_P(PSTR("Win"), false);
     }
-    
+
 
     oled_set_cursor(1, 3);
 
     switch (get_highest_layer(layer_state)) {
         case _NAV:
-            oled_write_P(PSTR("NAV"), true);
+            oled_write_P(PSTR("NAV "), true);
             break;
         case _MOU:
-            oled_write_P(PSTR("MOU"), true);
+            oled_write_P(PSTR("MOU "), true);
             break;
-        case _NUM:
-            oled_write_P(PSTR("NUM"), true);
+        case _SYM:
+            oled_write_P(PSTR("SYM "), true);
             break;
         case _FUN:
-            oled_write_P(PSTR("FUN"), true);
+            oled_write_P(PSTR("FUN "), true);
             break;
         default:
-            oled_write_P(PSTR("   "), true);
+            oled_write_P(PSTR("BASE"), true);
 
     }
 
-    oled_set_cursor(12, 3);
 
     // Capslock indicator
     led_t led_usb_state = host_keyboard_led_state();
-    if (led_usb_state.caps_lock) {
-        oled_write_P(PSTR("CAPS"), false);
-    }
+    oled_set_cursor(1, 5);
+    oled_write_P(PSTR("A"), led_usb_state.caps_lock);
+    oled_write_P(PSTR("1"), led_usb_state.num_lock);
+    oled_write_P(PSTR("v"), led_usb_state.scroll_lock);
 
+    oled_set_cursor(1, 7);
+    oled_write_P(PSTR("G"), get_mods() & MOD_MASK_GUI);
+    oled_write_P(PSTR("A"), get_mods() & MOD_MASK_ALT);
+    oled_write_P(PSTR("C"), get_mods() & MOD_MASK_CTRL);
+    oled_write_P(PSTR("S"), get_mods() & MOD_MASK_SHIFT);
+
+    oled_set_cursor(1, 9);
+    oled_write_P(PSTR("C_W"), is_caps_word_on());
 }
 
-// oled_rotation_t oled_init_user(oled_rotation_t rotation) {
+oled_rotation_t oled_init_user(oled_rotation_t rotation) {
 //     if (is_keyboard_master()) {
 //         return OLED_ROTATION_0;
 //     } else {
-//         return OLED_ROTATION_270;
+        return OLED_ROTATION_270;
 //     }
-// }
+}
 
 // /* Animation bit by j-inc https://github.com/qmk/qmk_firmware/tree/master/keyboards/kyria/keymaps/j-inc */
 // // WPM-responsive animation stuff here

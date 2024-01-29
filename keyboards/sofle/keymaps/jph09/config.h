@@ -48,9 +48,11 @@
 #undef MOUSEKEY_TIME_TO_MAX
 #define MOUSEKEY_TIME_TO_MAX    64
 
-// Oneshot options
+// Tapping options
 #define TAPPING_TOGGLE 2
-#define ONESHOT_TAP_TOGGLE 2
+#define DOUBLE_TAP_SHIFT_TURNS_ON_CAPS_WORD
+#undef TAPPING_TERM
+#define TAPPING_TERM 200
 
 // Saving space
 // #define NO_ACTION_TAPPING
