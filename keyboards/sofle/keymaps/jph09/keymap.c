@@ -45,6 +45,10 @@ enum sofle_layers {
 #define OSMRALT OSM(MOD_RALT)
 #define OSMRGUI OSM(MOD_RGUI)
 
+// Abbreviations for layer-taps
+#define NAV_BSP LT(_NAV, KC_BSPC)
+#define SYM_ENT LT(_SYM, KC_ENT)
+
 // Extra aliases for ISO UK keys
 #define KC_GBP S(KC_3)      // Pound sign
 #define KC_EUR RALT(KC_4)   // Euro sign
@@ -96,7 +100,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_ESC,  KC_Q,    KC_W,    KC_F,    KC_P,    KC_B,                          KC_J,    KC_L,    KC_U,    KC_Y,    KC_MINS, KC_DEL, \
   KC_TAB,  KC_A,    KC_R,    KC_S,    KC_T,    KC_G,                          KC_M,    KC_N,    KC_E,    KC_I,    KC_O,    KC_BSPC, \
   KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,    KC_MUTE,     XXXXXXX, KC_K,    KC_H,    KC_COMM, KC_DOT,  KC_QUOT, KC_ENT, \
-                   KC_LCTL, KC_LGUI, KC_LALT, MO(_NAV), OSMLSFT,     KC_SPC, MO(_SYM), KC_RALT, KC_APP, KC_RCTL \
+                   KC_LCTL, KC_LGUI, KC_LALT,  NAV_BSP, OSMLSFT,     KC_SPC,  SYM_ENT, KC_RALT, KC_APP, KC_RCTL \
 ),
 
 [_SYM] = LAYOUT( \
