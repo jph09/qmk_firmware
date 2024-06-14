@@ -6,3 +6,7 @@
 #undef TAPPING_TERM
 #define TAPPING_TERM 200
 
+// Pro Micro RB2040 RGB LED
+#define WS2812_DI_PIN 25U
+#define RGBLIGHT_LED_COUNT 2
+#define RGBLED_SPLIT { 1, 1 }

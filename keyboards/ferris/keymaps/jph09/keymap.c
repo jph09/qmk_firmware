@@ -71,7 +71,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-  return update_tri_layer_state(state, 1, 2, 3);
+    state = update_tri_layer_state(state, 1, 2, 3);
+    return state;
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -168,23 +169,4 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             break;
     }
     return true;
-}
-
-// TODO: use pro micro RGB LED to indicate caps/scroll/numlock status and Mac (Ctrl/GUI swapped) modes
-layer_state_t layer_state_set_user(layer_state_t state) {
-    switch (get_highest_layer(state)) {
-        case 3:
-            rgblight_setrgb(RGB_YELLOW);
-            break;
-        case 2:
-            rgblight_setrgb(RGB_GREEN);
-            break;
-        case 1:
-            rgblight_setrgb(RGB_RED);
-            break;
-        default: // for any other layers, or the default layer
-            rgblight_setrgb (RGB_WHITE);
-            break;
-    }
-return state;
 }
