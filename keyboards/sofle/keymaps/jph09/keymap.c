@@ -60,20 +60,19 @@ enum sofle_layers {
 #define KC_COPY C(KC_INS)
 #define KC_PSTE S(KC_INS)
 
-/* Safety Tap Dance on special functions */
-enum {
-    TD_BOOT = 0,
+/* Safety Tap Dance on QK_BOOT */
+enum { 
+    _TD_BOOT = 0, 
 };
-
 void tap_dance_boot(tap_dance_state_t *state, void *user_data) {
     if (state->count == 2) {
         reset_keyboard();
     }
 };
-
 tap_dance_action_t tap_dance_actions[] = {
-    [TD_BOOT] = ACTION_TAP_DANCE_FN (tap_dance_boot),
+    [_TD_BOOT] = ACTION_TAP_DANCE_FN (tap_dance_boot),
 };
+#define TD_BOOT TD(_TD_BOOT)
 
 /* Override shifted keys */
 const key_override_t ko_scln = ko_make_basic(MOD_MASK_SHIFT, KC_COMM, KC_SCLN);
@@ -116,15 +115,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   _______, XXXXXXX, XXXXXXX, XXXXXXX, KC_APP,  KC_ESC,                       KC_DEL,  KC_SCRL, KC_PSCR, KC_PAUS, KC_INS,   _______, \
   _______, OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_TAB,                       KC_BSPC, KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT, _______, \
   _______, KC_UNDO, KC_CUT,  KC_COPY, KC_PSTE, KC_AGIN, _______,    _______, KC_ENT,  KC_HOME, KC_PGDN, KC_PGUP, KC_END,   _______, \
-                   _______, _______,  _______, _______, _______,    _______, _______, _______, _______, _______ \
+                    _______, _______, _______, _______, _______,    _______, _______, _______, _______, _______ \
 ),
 
 [_FUN] = LAYOUT( \
-  _______, _______, _______, _______, _______, _______,                          _______, _______, _______, _______, _______, _______, \
-  _______, KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                            KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  _______, \
-  _______, OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_F11,                           KC_F12,  OSMRSFT, OSMRCTL, OSMRALT, OSMRGUI, _______, \
-  _______, CG_TOGG, XXXXXXX, XXXXXXX, KC_CAPS, TD(TD_BOOT), _______,    _______, XXXXXXX, KC_MUTE, KC_VOLD, KC_VOLU, KC_MPLY, _______, \
-                        _______, _______, _______, _______, _______,    _______, _______, _______, _______, _______ \
+  _______, _______, _______, _______, _______, _______,                      _______, _______, _______, _______, _______, _______, \
+  _______, KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                        KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  _______, \
+  _______, OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_F11,                       KC_F12,  OSMRSFT, OSMRCTL, OSMRALT, OSMRGUI, _______, \
+  _______, CG_TOGG, XXXXXXX, XXXXXXX, KC_CAPS, TD_BOOT, _______,    _______, XXXXXXX, KC_MUTE, KC_VOLD, KC_VOLU, KC_MPLY, _______, \
+                    _______, _______, _______, _______, _______,    _______, _______, _______, _______, _______ \
 ),
 
 [_MOU] = LAYOUT( \
