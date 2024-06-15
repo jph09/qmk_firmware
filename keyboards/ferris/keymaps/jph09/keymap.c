@@ -1,5 +1,85 @@
 #include QMK_KEYBOARD_H
 
+
+// OS detection
+bool mac_mode;
+void set_mac_mode(bool mode) {
+    mac_mode = mode;
+    keymap_config.swap_lctl_lgui = mode;
+    keymap_config.swap_rctl_rgui = mode;
+    rgblight_set_layer_state(1, mode);
+}
+bool process_detected_host_os_user(os_variant_t detected_os) {
+    switch (detected_os) {
+        case OS_MACOS:
+        case OS_IOS:
+            set_mac_mode(true);
+            break;
+        case OS_WINDOWS:
+        case OS_LINUX:
+            set_mac_mode(false);
+            break;
+        case OS_UNSURE:
+        default:
+            break;
+    }
+    return true;
+}
+
+
+
+
+// Lighting Layers
+const rgblight_segment_t PROGMEM rgb_layer_default[] = RGBLIGHT_LAYER_SEGMENTS(
+    {0, 2, HSV_RED}
+);
+const rgblight_segment_t PROGMEM rgb_layer_mac[] = RGBLIGHT_LAYER_SEGMENTS(
+    {0, 2, HSV_CYAN}
+);
+const rgblight_segment_t PROGMEM rgb_layer_capslock[] = RGBLIGHT_LAYER_SEGMENTS(
+    {1, 1, HSV_YELLOW}
+);
+const rgblight_segment_t PROGMEM rgb_layer_capsword[] = RGBLIGHT_LAYER_SEGMENTS(
+    {0, 1, HSV_ORANGE}
+);
+const rgblight_segment_t PROGMEM rgb_layer_osm_shift[] = RGBLIGHT_LAYER_SEGMENTS(
+    {0, 1, HSV_ORANGE}
+);
+const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
+    rgb_layer_default,
+    rgb_layer_mac,
+    rgb_layer_capslock,
+    rgb_layer_capsword,
+    rgb_layer_osm_shift
+);
+
+void keyboard_post_init_user(void) {
+    // Enable the LED layers
+    rgblight_layers = my_rgb_layers;
+    rgblight_set_layer_state(0, true);
+
+    // Check mac mode status
+    mac_mode = keymap_config.swap_lctl_lgui;
+    rgblight_set_layer_state(1, mac_mode);
+}
+
+bool led_update_user(led_t led_state) {
+    rgblight_set_layer_state(2, led_state.caps_lock);
+    return true;
+}
+
+void caps_word_set_user(bool active) {
+    rgblight_set_layer_state(3, active);
+}
+
+void oneshot_mods_changed_user(uint8_t mods) {
+    rgblight_set_layer_state(4, mods & MOD_MASK_SHIFT);
+}
+
+
+
+// KEYMAP STARTS HERE
+
 // Abbreviations for one-shots
 #define OSMLGUI OSM(MOD_LGUI)
 #define OSMLALT OSM(MOD_LALT)
@@ -38,8 +118,8 @@ const key_override_t **key_overrides = (const key_override_t *[]){
 };
 
 /* Safety Tap Dance on QK_BOOT */
-enum { 
-    _TD_BOOT = 0, 
+enum {
+    _TD_BOOT = 0,
 };
 void tap_dance_boot(tap_dance_state_t *state, void *user_data) {
     if (state->count == 2) {
@@ -50,44 +130,6 @@ tap_dance_action_t tap_dance_actions[] = {
     [_TD_BOOT] = ACTION_TAP_DANCE_FN (tap_dance_boot),
 };
 #define TD_BOOT TD(_TD_BOOT)
-
-const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-
-    /* COLEMAK Mod-DH base layer */
-    [0] = LAYOUT(                                                                             \
-    KC_Q,    KC_W,    KC_F,    KC_P,    KC_B,    KC_J,    KC_L,    KC_U,    KC_Y,    KC_MINS, \
-    KC_A,    KC_R,    KC_S,    KC_T,    KC_G,    KC_M,    KC_N,    KC_E,    KC_I,    KC_O,    \
-    KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,    KC_K,    KC_H,    KC_COMM, KC_DOT,  KC_QUOT, \
-                               LT2BSP,  OSMLSFT, KC_SPC,  LT1ENT                              \
-    ),
-
-    /* Numbers and symbols layer
-    Missing: KC_PERC, KC_CIRC, KC_AMPR, S(KC_NUBS), S(KC_NUHS), S(KC_GRV), RALT(KC_GRV), KC_LCBR, KC_RCBR, KC_LABK, KC_RABK 
-    */
-    [1] = LAYOUT(                                                                             \
-    KC_EUR,  KC_DLR,  KC_GBP,  KC_EXLM, KC_QUES, KC_EQL,  KC_ASTR, KC_SLSH, KC_PLUS, _______, \
-    KC_7,    KC_5,    KC_3,    KC_1,    KC_9,    KC_8,    KC_0,    KC_2,    KC_4,    KC_6,    \
-    KC_NUBS, KC_NUHS, KC_NUAT, KC_LBRC, KC_LPRN, KC_RPRN, KC_RBRC, _______, _______, KC_GRV,  \
-                               _______, _______, _______, _______                             \
-    ), 
-
-    /* Navigation layer */
-    [2] = LAYOUT(                                                                             \
-    G(KC_L), C(KC_S), C(KC_F), KC_APP,  KC_ESC,  KC_DEL,  KC_SCRL, KC_PSCR, KC_PAUS, KC_INS,  \
-    OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_TAB,  KC_BSPC, KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT,\
-    KC_UNDO, KC_CUT,  KC_COPY, KC_PSTE, KC_AGIN, KC_ENT,  KC_HOME, KC_PGDN, KC_PGUP, KC_END,  \
-                               _______, _______, _______, _______                             \
-    ),
-
-    /* Function layer */
-    [3] = LAYOUT(                                                                             \
-    KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  \
-    OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_F11,  KC_F12,  OSMRSFT, OSMRCTL, OSMRALT, OSMRGUI, \
-    CG_TOGG, RGB_VAD, RGB_VAI, KC_CAPS, TD_BOOT, XXXXXXX, KC_MUTE, KC_VOLD, KC_VOLU, KC_MPLY, \
-                               _______, _______, _______, _______                             \
-    ),
-
-};
 
 layer_state_t layer_state_set_user(layer_state_t state) {
     state = update_tri_layer_state(state, 1, 2, 3);
@@ -141,7 +183,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     unregister_mods(mod_config(MOD_LCTL));
                     unregister_code(KC_INS);
                 }
-            } 
+            }
             return false;
             break;
         case KC_PASTE:
@@ -165,7 +207,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     unregister_mods(mod_config(MOD_LSFT));
                     unregister_code(KC_INS);
                 }
-            } 
+            }
             return false;
             break;
         case KC_UNDO:
@@ -203,3 +245,55 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
     return true;
 }
+
+// Use post_process_record_user to get state after flag is flipped...
+void post_process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case CG_TOGG:
+            mac_mode = keymap_config.swap_lctl_lgui;
+            rgblight_set_layer_state(1, mac_mode);
+            break;
+    }
+}
+
+
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+
+    /* COLEMAK Mod-DH base layer */
+    [0] = LAYOUT(                                                                             \
+    KC_Q,    KC_W,    KC_F,    KC_P,    KC_B,    KC_J,    KC_L,    KC_U,    KC_Y,    KC_MINS, \
+    KC_A,    KC_R,    KC_S,    KC_T,    KC_G,    KC_M,    KC_N,    KC_E,    KC_I,    KC_O,    \
+    KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,    KC_K,    KC_H,    KC_COMM, KC_DOT,  KC_QUOT, \
+                               LT2BSP,  OSMLSFT, KC_SPC,  LT1ENT                              \
+    ),
+
+    /* Numbers and symbols layer
+    Missing: KC_PERC, KC_CIRC, KC_AMPR, S(KC_NUBS), S(KC_NUHS), S(KC_GRV), RALT(KC_GRV), KC_LCBR, KC_RCBR, KC_LABK, KC_RABK
+    */
+    [1] = LAYOUT(                                                                             \
+    KC_EUR,  KC_DLR,  KC_GBP,  KC_EXLM, KC_QUES, KC_EQL,  KC_ASTR, KC_SLSH, KC_PLUS, _______, \
+    KC_7,    KC_5,    KC_3,    KC_1,    KC_9,    KC_8,    KC_0,    KC_2,    KC_4,    KC_6,    \
+    KC_NUBS, KC_NUHS, KC_NUAT, KC_LBRC, KC_LPRN, KC_RPRN, KC_RBRC, _______, _______, KC_GRV,  \
+                               _______, _______, _______, _______                             \
+    ),
+
+    /* Navigation layer */
+    [2] = LAYOUT(                                                                             \
+    G(KC_L), C(KC_S), C(KC_F), KC_APP,  KC_ESC,  KC_DEL,  KC_SCRL, KC_PSCR, KC_PAUS, KC_INS,  \
+    OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_TAB,  KC_BSPC, KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT,\
+    KC_UNDO, KC_CUT,  KC_COPY, KC_PSTE, KC_AGIN, KC_ENT,  KC_HOME, KC_PGDN, KC_PGUP, KC_END,  \
+                               _______, _______, _______, _______                             \
+    ),
+
+    /* Function layer */
+    [3] = LAYOUT(                                                                             \
+    KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  \
+    OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_F11,  KC_F12,  OSMRSFT, OSMRCTL, OSMRALT, OSMRGUI, \
+    CG_TOGG, RGB_VAD, RGB_VAI, KC_CAPS, TD_BOOT, XXXXXXX, KC_MUTE, KC_VOLD, KC_VOLU, KC_MPLY, \
+                               _______, _______, _______, _______                             \
+    ),
+
+};
+
+
+
