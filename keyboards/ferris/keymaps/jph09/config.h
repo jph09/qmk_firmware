@@ -1,10 +1,9 @@
 #pragma once
 
 // Tapping options
-#define TAPPING_TOGGLE 2
-#define DOUBLE_TAP_SHIFT_TURNS_ON_CAPS_WORD
 #undef TAPPING_TERM
 #define TAPPING_TERM 200
+#define DOUBLE_TAP_SHIFT_TURNS_ON_CAPS_WORD
 
 // Pro Micro RB2040 RGB LED
 #define WS2812_DI_PIN 25U

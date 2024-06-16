@@ -242,6 +242,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return false;
             break;
+        case OSMLSFT:
+            if (record->event.pressed && record->tap.count) {
+                // If Caps Word is on, turn it off
+                // and don't activate one-shot shift.
+                if (is_caps_word_on()) {
+                    caps_word_off();
+                    return false;
+                }
+            }
+            return true;
+            break;
     }
     return true;
 }

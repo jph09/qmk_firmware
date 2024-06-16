@@ -11,7 +11,6 @@ CAPS_WORD_ENABLE = yes
 # Pro Micro RP2040 features
 CONVERT_TO = promicro_rp2040
 RGBLIGHT_ENABLE = yes
-WS2812_DRIVER = vendor
 
 # OS Detection
 OS_DETECTION_ENABLE = yes
