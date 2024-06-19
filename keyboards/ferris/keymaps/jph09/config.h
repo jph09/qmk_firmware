@@ -1,12 +1,15 @@
 #pragma once
 
+#define SPLIT_WATCHDOG_ENABLE
+
 // Tapping options
 #undef TAPPING_TERM
 #define TAPPING_TERM 200
+#define PERMISSIVE_HOLD
 #define DOUBLE_TAP_SHIFT_TURNS_ON_CAPS_WORD
 
-// Pro Micro RB2040 RGB LED
-#define WS2812_DI_PIN 25U
+// Pro Micro RP2040 onboard RGB LED
+#define WS2812_DI_PIN 25U // Alias for GPIO25 not defined by promicro_rp2040 converter, hardware address is 25U.
 #define RGBLIGHT_LED_COUNT 2
 #define RGBLED_SPLIT { 1, 1 }
 #define RGBLIGHT_SLEEP

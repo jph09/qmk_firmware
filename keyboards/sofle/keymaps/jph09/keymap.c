@@ -28,10 +28,6 @@ enum sofle_layers {
 };
 
  enum custom_keycodes {
-//     KC_UND = SAFE_RANGE,
-//     KC_RDO
-//     KC_CPY,
-//     KC_PST,
     KC_SCROLLING,
  };
 
