@@ -93,6 +93,7 @@ void oneshot_mods_changed_user(uint8_t mods) {
 // Abbreviations for layer-taps
 #define LT2BSP LT(2,KC_BSPC)
 #define LT1ENT LT(1,KC_ENT)
+#define LT4QUO LT(4,KC_QUOT)
 
 // Extra aliases for ISO UK keys
 #define KC_GBP S(KC_3)      // Pound sign
@@ -274,7 +275,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT(                                                                             \
     KC_Q,    KC_W,    KC_F,    KC_P,    KC_B,    KC_J,    KC_L,    KC_U,    KC_Y,    KC_MINS, \
     KC_A,    KC_R,    KC_S,    KC_T,    KC_G,    KC_M,    KC_N,    KC_E,    KC_I,    KC_O,    \
-    KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,    KC_K,    KC_H,    KC_COMM, KC_DOT,  KC_QUOT, \
+    KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,    KC_K,    KC_H,    KC_COMM, KC_DOT,  LT4QUO, \
                                LT2BSP,  OSMLSFT, KC_SPC,  LT1ENT                              \
     ),
 
@@ -301,6 +302,22 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  \
     OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_F11,  KC_F12,  OSMRSFT, OSMRCTL, OSMRALT, OSMRGUI, \
     CG_TOGG, RGB_VAD, RGB_VAI, KC_CAPS, TD_BOOT, XXXXXXX, KC_MUTE, KC_VOLD, KC_VOLU, KC_MPLY, \
+                               _______, _______, _______, _______                             \
+    ),
+
+    /* Brackets layer */
+    [4] = LAYOUT(                                                                             \
+    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+    KC_GRV,  KC_LABK, KC_LPRN, KC_LBRC, _______, _______, KC_RBRC, KC_RPRN, KC_RABK, _______, \
+    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+                               _______, KC_LCBR, KC_RCBR, _______                             \
+    ),
+
+    /* Blank layer */
+    [5] = LAYOUT(                                                                             \
+    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
                                _______, _______, _______, _______                             \
     ),
 

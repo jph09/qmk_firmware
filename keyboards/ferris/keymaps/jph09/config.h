@@ -1,6 +1,10 @@
 #pragma once
 
+// Work around a bug with my keyboard not detecting the master side correctly
 #define SPLIT_WATCHDOG_ENABLE
+
+// Support more layer with Via
+#define DYNAMIC_KEYMAP_LAYER_COUNT 10
 
 // Tapping options
 #undef TAPPING_TERM
