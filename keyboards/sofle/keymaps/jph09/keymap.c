@@ -28,7 +28,7 @@ enum sofle_layers {
 };
 
  enum custom_keycodes {
-    KC_SCROLLING,
+    KC_SCROLLING = SAFE_RANGE,
  };
 
 // Abbreviations for one-shots
