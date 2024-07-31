@@ -7,10 +7,14 @@ VIA_ENABLE = yes
 
 MAGIC_ENABLE = yes
 CAPS_WORD_ENABLE = yes
+OS_DETECTION_ENABLE = yes
 
 # Pro Micro RP2040 features
 CONVERT_TO = promicro_rp2040
 RGBLIGHT_ENABLE = yes
 
-# OS Detection
-OS_DETECTION_ENABLE = yes
+
+#Debug options
+VERBOSE = no
+CONSOLE_ENABLE = no
+COMMAND_ENABLE = no
