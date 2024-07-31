@@ -82,14 +82,27 @@ void oneshot_mods_changed_user(uint8_t mods) {
 
 enum ferris_layers {
     _BASE = 0,
-    _NUM,
-    _BRK,
-    _NAV,
-    _FUN,
+    _NUMR, // Number row layer
+    _SYMB, // Symbols layer
+    _NAVI, // Navigation layer
+    _FUNC, // Function keys layer
+    _NUMP, // Numpad layer
 };
+
+layer_state_t layer_state_set_user(layer_state_t state) {
+
+    // Activate Function layer when Symbols and Navigation layers are active
+    state = update_tri_layer_state(state, _SYMB, _NAVI, _FUNC);
+
+    // Activate Numpad layer when Number and Navigation layers are active
+    state = update_tri_layer_state(state, _NUMR, _NAVI, _NUMP);
+
+    return state;
+}
 
  enum custom_keycodes {
     LOCKSCR = SAFE_RANGE,
+    LAYERLK,
  };
 
 // Aliases for ISO UK keys
@@ -99,6 +112,8 @@ enum ferris_layers {
 #define KC_NUAT S(KC_QUOT)  // Non-US at sign
 #define KC_NUPI S(KC_NUBS)  // Non-US pipe
 #define KC_NUTI S(KC_NUHS)  // Non-US tilde
+#define S_GRV S(KC_GRV)
+#define A_GRV RALT(KC_GRV)
 
 // Abbreviations for one-shots
 #define OSMLGUI OSM(MOD_LGUI)
@@ -111,19 +126,20 @@ enum ferris_layers {
 #define OSMRGUI OSM(MOD_RGUI)
 
 // Abbreviations for layer-taps
-#define NUM_ENT LT(_NUM,KC_ENT)
-#define BRK_QUO LT(_BRK,KC_QUOT)
-#define NAV_BSP LT(_NAV,KC_BSPC)
+#define NAV_BSP LT(_NAVI,KC_BSPC)
+#define SYM_ENT LT(_SYMB,KC_ENT)
+#define NUM_SPC LT(_NUMR,KC_SPC)
+//#define SYM_QUO LT(_SYMB,KC_QUOT)
 
 /* Override shifted keys */
 const key_override_t ko_scln = ko_make_basic(MOD_MASK_SHIFT, KC_COMM, KC_SCLN);
 const key_override_t ko_cln = ko_make_basic(MOD_MASK_SHIFT, KC_DOT, KC_COLN);
-// const key_override_t ko_non_us_dquo = ko_make_basic(MOD_MASK_SHIFT, KC_QUOT, KC_NUDQ); // See case for BRK_QUO in process_record_user()
+const key_override_t ko_non_us_dquo = ko_make_basic(MOD_MASK_SHIFT, KC_QUOT, KC_NUDQ); // See case for SYM_QUO in process_record_user()
 // const key_override_t ko_non_us_at = ko_make_basic(MOD_MASK_SHIFT, KC_2, KC_NUAT);
 const key_override_t **key_overrides = (const key_override_t *[]){
     &ko_scln,
     &ko_cln,
-    // &ko_non_us_dquo,
+    &ko_non_us_dquo,
     // &ko_non_us_at,
     NULL
 };
@@ -141,11 +157,6 @@ tap_dance_action_t tap_dance_actions[] = {
     [_TD_BOOT] = ACTION_TAP_DANCE_FN (tap_dance_boot),
 };
 #define TD_BOOT TD(_TD_BOOT)
-
-layer_state_t layer_state_set_user(layer_state_t state) {
-    state = update_tri_layer_state(state, _NUM, _NAV, _FUN);
-    return state;
-}
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
@@ -267,16 +278,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return true;
             break;
-        case BRK_QUO:
-            if (record->event.pressed && record->tap.count) {
-                // If shift is active and BRK_QUO is tapped
-                // then type double-quote instead of quote
-                if ((get_mods() | get_oneshot_mods()) & MOD_MASK_SHIFT) {
-                    tap_code16(KC_NUDQ);
-                    return false;
-                }
-            }
-            break;
+        // case SYM_QUO:
+        //     if (record->event.pressed && record->tap.count) {
+        //         // If shift is active and SYM_QUO is tapped
+        //         // then type double-quote instead of quote
+        //         if ((get_mods() | get_oneshot_mods()) & MOD_MASK_SHIFT) {
+        //             tap_code16(KC_NUDQ);
+        //             return false;
+        //         }
+        //     }
+        //     break;
         case LOCKSCR:
             if (mac_mode) {
                 // macOS mode
@@ -316,56 +327,65 @@ void post_process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
-    /* COLEMAK Mod-DH base layer */
+    // COLEMAK Mod-DH base layer
     [_BASE] = LAYOUT(                                                                         \
     KC_Q,    KC_W,    KC_F,    KC_P,    KC_B,    KC_J,    KC_L,    KC_U,    KC_Y,    KC_MINS, \
     KC_A,    KC_R,    KC_S,    KC_T,    KC_G,    KC_M,    KC_N,    KC_E,    KC_I,    KC_O,    \
-    KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,    KC_K,    KC_H,    KC_COMM, KC_DOT,  BRK_QUO, \
-                               NAV_BSP, OSMLSFT, KC_SPC,  NUM_ENT                             \
+    KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,    KC_K,    KC_H,    KC_COMM, KC_DOT,  KC_QUOT, \
+                               NAV_BSP, OSMLSFT, NUM_SPC, SYM_ENT                             \
     ),
 
-    /* Numbers and symbols layer
-    Missing: S(KC_GRV), RALT(KC_GRV)
-    */
-    [_NUM] = LAYOUT(                                                                          \
-    KC_EUR,  KC_DLR,  KC_GBP,  KC_EXLM, KC_QUES, KC_EQL,  KC_ASTR, KC_SLSH, KC_PLUS, _______, \
+    // Number row layer
+    // Missing: 
+    [_NUMR] = LAYOUT(                                                                         \
+    KC_GRV,  KC_DLR,  KC_GBP,  KC_EUR,  KC_UNDS, KC_ASTR, KC_SLSH, KC_EQL,  KC_PLUS, _______, \
     KC_7,    KC_5,    KC_3,    KC_1,    KC_9,    KC_8,    KC_0,    KC_2,    KC_4,    KC_6,    \
-    KC_NUBS, KC_NUPI, KC_NUHS, KC_NUAT, KC_NUTI, KC_CIRC, KC_AMPR, _______, _______, MO(_BRK),\
-                               _______, KC_PERC, _______, _______                             \
+    KC_AMPR, KC_PERC, KC_NUHS, KC_LPRN, KC_RPRN, KC_LABK, KC_RABK, _______, _______, KC_CIRC, \
+                               _______, _______, _______, _______                             \
     ),
 
-    /* Brackets layer */
-    [_BRK] = LAYOUT(                                                                          \
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
-    KC_GRV,  KC_LABK, KC_LBRC, KC_LPRN, _______, _______, KC_RPRN, KC_RBRC, KC_RABK, _______, \
-    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
-                               _______, KC_LCBR, KC_RCBR, _______                             \
+    // Symbols layer
+    [_SYMB] = LAYOUT(                                                                         \
+    KC_GRV,  S_GRV,   A_GRV,   KC_SCLN, KC_COLN, LAYERLK, XXXXXXX, XXXXXXX, C(KC_S), LOCKSCR, \
+    KC_QUES, KC_EXLM, KC_NUAT, KC_LBRC, KC_RBRC, KC_CAPS, OSMRSFT, OSMRCTL, OSMRALT, OSMRGUI, \
+    KC_NUBS, KC_NUPI, KC_NUTI, KC_LCBR, KC_RCBR, KC_AGIN, KC_PSTE, KC_COPY, KC_CUT,  KC_UNDO, \
+                               _______, _______, _______, _______                             \
     ),
 
-    /* Navigation layer */
-    [_NAV] = LAYOUT(                                                                          \
-    LOCKSCR, C(KC_S), C(KC_F), KC_APP,  KC_ESC,  KC_DEL,  KC_SCRL, KC_PSCR, KC_PAUS, KC_INS,  \
-    OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_TAB,  KC_BSPC, KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT,\
+    // Navigation layer
+    [_NAVI] = LAYOUT(                                                                         \
+    LOCKSCR, C(KC_S), C(KC_F), KC_APP,  LAYERLK, KC_ESC,  KC_BSPC, KC_DEL,  KC_INS,  KC_SPC,  \
+    OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_CAPS, KC_TAB,  KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT,\
     KC_UNDO, KC_CUT,  KC_COPY, KC_PSTE, KC_AGIN, KC_ENT,  KC_HOME, KC_PGDN, KC_PGUP, KC_END,  \
                                _______, _______, _______, _______                             \
     ),
 
-    /* Function layer */
-    [_FUN] = LAYOUT(                                                                          \
-    KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  \
-    OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_F11,  KC_F12,  OSMRSFT, OSMRCTL, OSMRALT, OSMRGUI, \
-    CG_TOGG, RGB_VAD, RGB_VAI, KC_CAPS, TD_BOOT, XXXXXXX, KC_MUTE, KC_VOLD, KC_VOLU, KC_MPLY, \
+    // Function keys layer
+    // Active with Symbols and Navigation
+    [_FUNC] = LAYOUT(
+    TD_BOOT, CG_TOGG, RGB_VAD, RGB_VAI, KC_PSCR, _______, KC_F1,   KC_F2,   KC_F3,   KC_F4,   \
+    _______, _______, _______, _______, KC_SCRL, _______, KC_F5,   KC_F6,   KC_F7,   KC_F8,   \
+    KC_MUTE, KC_VOLD, KC_VOLU, KC_MPLY, KC_PAUS, _______, KC_F9,   KC_F10,  KC_F11,  KC_F12,  \
                                _______, _______, _______, _______                             \
     ),
 
-    /* Blank layer */
-    [5] = LAYOUT(                                                                             \
+    // Numpad layer
+    // Active with Numbers and Navigation
+    [_NUMP] = LAYOUT(                                                                         \
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
                                _______, _______, _______, _______                             \
     ),
-
+/* 
+    // Blank layer
+    [] = LAYOUT(                                                                              \
+    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+                               _______, _______, _______, _______                             \
+    ),
+ */
 };
 
 

@@ -3,12 +3,13 @@
 // Work around a bug with my keyboard not detecting the master side correctly
 #define SPLIT_WATCHDOG_ENABLE
 
-// Support more layer with Via
+// Support more layers with Via
 #define DYNAMIC_KEYMAP_LAYER_COUNT 10
 
 // Tapping options
 #undef TAPPING_TERM
 #define TAPPING_TERM 200
+#define QUICK_TAP_TERM 0 // Tap-then-hold does the hold action instead of auto-repeating the tap
 #define PERMISSIVE_HOLD
 #define DOUBLE_TAP_SHIFT_TURNS_ON_CAPS_WORD
 
