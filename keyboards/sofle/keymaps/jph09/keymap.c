@@ -1,34 +1,70 @@
-/* Copyright 2022 Khoa Truong <foureight84@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include QMK_KEYBOARD_H
 #include <string.h>
 #include "lib/lib8tion/lib8tion.h"
 
 
+// OS detection
+bool mac_mode;
+void set_mac_mode(bool mode) {
+    mac_mode = mode;
+    keymap_config.swap_lctl_lgui = mode;
+    keymap_config.swap_rctl_rgui = mode;
+}
+#ifdef OS_DETECTION_ENABLE
+bool process_detected_host_os_user(os_variant_t detected_os) {
+    switch (detected_os) {
+        case OS_MACOS:
+        case OS_IOS:
+            set_mac_mode(true);
+            break;
+        case OS_WINDOWS:
+        case OS_LINUX:
+            set_mac_mode(false);
+            break;
+        case OS_UNSURE:
+        default:
+            break;
+    }
+    return true;
+}
+#endif // OS_DETECTION_ENABLE
+
+
 enum sofle_layers {
     _BASE = 0,
-    _SYM,
-    _NAV,
-    _FUN,
+    _NUMR, // Number row layer
+    _SYMB, // Symbols layer
+    _NAVI, // Navigation layer
+    _FUNC, // Function keys layer
+    _NUMP, // Numpad layer
 };
 
+layer_state_t layer_state_set_user(layer_state_t state) {
+
+    // Activate Function layer when Symbols and Navigation layers are active
+    state = update_tri_layer_state(state, _SYMB, _NAVI, _FUNC);
+
+    // Activate Numpad layer when Number and Navigation layers are active
+    state = update_tri_layer_state(state, _NUMR, _NAVI, _NUMP);
+
+    return state;
+}
+
  enum custom_keycodes {
-    KC_SCROLLING = SAFE_RANGE,
+    LOCKSCR = SAFE_RANGE,
+    LAYERLK,
+    SCROLL,
  };
+
+// Aliases for ISO UK keys
+#define KC_GBP S(KC_3)      // Pound sign
+#define KC_EUR RALT(KC_4)   // Euro sign
+#define KC_NUDQ S(KC_2)     // Non-US double quote
+#define KC_NUAT S(KC_QUOT)  // Non-US at sign
+#define KC_NUPI S(KC_NUBS)  // Non-US pipe
+#define KC_NUTI S(KC_NUHS)  // Non-US tilde
+#define S_GRV S(KC_GRV)
+#define A_GRV RALT(KC_GRV)
 
 // Abbreviations for one-shots
 #define OSMLGUI OSM(MOD_LGUI)
@@ -41,28 +77,27 @@ enum sofle_layers {
 #define OSMRGUI OSM(MOD_RGUI)
 
 // Abbreviations for layer-taps
-#define NAV_BSP LT(_NAV, KC_BSPC)
-#define SYM_ENT LT(_SYM, KC_ENT)
+#define NAV_BSP LT(_NAVI,KC_BSPC)
+#define SYM_ENT LT(_SYMB,KC_ENT)
+#define NUM_SPC LT(_NUMR,KC_SPC)
 
-// Extra aliases for ISO UK keys
-#define KC_GBP S(KC_3)      // Pound sign
-#define KC_EUR RALT(KC_4)   // Euro sign
-#define KC_NUDQ S(KC_2)     // Non-US Double Quote
-#define KC_NUAT S(KC_QUOT)  // Non-US At sign
-#define KC_NUPI S(KC_NUBS)  // Non-US pipe
-#define KC_NUTI S(KC_NUHS)  // Non-US tilde
-
-// Custom cut/copy/paste
-#define KC_CUT S(KC_DEL)
-#define KC_COPY C(KC_INS)
-#define KC_PSTE S(KC_INS)
-#define KC_UNDO C(KC_Z)
-#define KC_AGIN C(KC_Y)
+/* Override shifted keys */
+const key_override_t ko_scln = ko_make_basic(MOD_MASK_SHIFT, KC_COMM, KC_SCLN);
+const key_override_t ko_cln = ko_make_basic(MOD_MASK_SHIFT, KC_DOT, KC_COLN);
+const key_override_t ko_non_us_dquo = ko_make_basic(MOD_MASK_SHIFT, KC_QUOT, KC_NUDQ); // See case for SYM_QUO in process_record_user()
+// const key_override_t ko_non_us_at = ko_make_basic(MOD_MASK_SHIFT, KC_2, KC_NUAT);
+const key_override_t **key_overrides = (const key_override_t *[]){
+    &ko_scln,
+    &ko_cln,
+    &ko_non_us_dquo,
+    // &ko_non_us_at,
+    NULL
+};
 
 #ifdef TAP_DANCE_ENABLE
 /* Safety Tap Dance on QK_BOOT */
-enum { 
-    _TD_BOOT = 0, 
+enum {
+    _TD_BOOT = 0,
 };
 void tap_dance_boot(tap_dance_state_t *state, void *user_data) {
     if (state->count == 2) {
@@ -77,74 +112,131 @@ tap_dance_action_t tap_dance_actions[] = {
 #define TD_BOOT KC_NO
 #endif // TAP_DANCE_ENABLE
 
-/* Override shifted keys */
-const key_override_t ko_scln = ko_make_basic(MOD_MASK_SHIFT, KC_COMM, KC_SCLN);
-const key_override_t ko_cln = ko_make_basic(MOD_MASK_SHIFT, KC_DOT, KC_COLN);
-const key_override_t ko_non_us_dquo = ko_make_basic(MOD_MASK_SHIFT, KC_QUOT, KC_NUDQ);
-const key_override_t **key_overrides = (const key_override_t *[]){
-    &ko_scln,
-    &ko_cln,
-    &ko_non_us_dquo,
-    NULL
-};
-
-const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-
-// COLEMAK Mod-DH 
-[_BASE] = LAYOUT( \
-  KC_GRV,  KC_APP,  KC_LCBR, KC_LBRC, KC_LPRN, KC_LABK,                       KC_RABK, KC_RPRN, KC_RBRC, KC_RCBR, KC_MINS, KC_EQL, \
-  KC_ESC,  KC_Q,    KC_W,    KC_F,    KC_P,    KC_B,                          KC_J,    KC_L,    KC_U,    KC_Y,    KC_MINS, KC_DEL, \
-  KC_TAB,  KC_A,    KC_R,    KC_S,    KC_T,    KC_G,                          KC_M,    KC_N,    KC_E,    KC_I,    KC_O,    KC_SCROLLING,\
-  KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,    KC_MUTE,     XXXXXXX, KC_K,    KC_H,    KC_COMM, KC_DOT,  KC_QUOT, KC_RSFT, \
-                   KC_LCTL, KC_LGUI, KC_LALT,  NAV_BSP, OSMLSFT,     KC_SPC,  SYM_ENT, KC_RALT, KC_RGUI, KC_RCTL \
-),
-
-[_SYM] = LAYOUT( \
-  _______, _______, _______, _______, _______, _______,                       _______, _______, _______, _______, _______, _______, \
-  _______, KC_EUR,  KC_DLR,  KC_GBP,  KC_EXLM, KC_QUES,                       KC_EQL,  KC_ASTR, KC_SLSH, KC_PLUS, _______, _______, \
-  _______, KC_7,    KC_5,    KC_3,    KC_1,    KC_9,                          KC_8,    KC_0,    KC_2,    KC_4,    KC_6,    _______, \
-  _______, KC_NUBS, KC_NUPI, KC_NUHS, KC_NUAT, KC_NUTI, _______,     _______, KC_CIRC, KC_AMPR, _______, _______, _______, _______, \
-                    _______, _______, _______, _______, _______,     _______, _______, _______, _______, _______ \
-), // missing (without mods): KC_PERC, KC_CIRC, KC_AMPR, S(KC_NUBS), S(KC_NUHS), S(KC_GRV), RALT(KC_GRV), KC_LCBR, KC_RCBR, KC_LABK, KC_RABK
-
-[_NAV] = LAYOUT( \
-  _______, _______, _______, _______, _______, _______,                      _______, _______, _______, _______, _______,  _______, \
-  _______, XXXXXXX, XXXXXXX, XXXXXXX, KC_APP,  KC_ESC,                       KC_DEL,  KC_SCRL, KC_PSCR, KC_PAUS, KC_INS,   _______, \
-  _______, OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_TAB,                       KC_BSPC, KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT, _______, \
-  _______, KC_UNDO, KC_CUT,  KC_COPY, KC_PSTE, KC_AGIN, _______,    _______, KC_ENT,  KC_HOME, KC_PGDN, KC_PGUP, KC_END,   _______, \
-                    _______, _______, _______, _______, _______,    _______, _______, _______, _______, _______ \
-),
-
-[_FUN] = LAYOUT( \
-  _______, _______, _______, _______, _______, _______,                      _______, _______, _______, _______, _______, _______, \
-  _______, KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                        KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  _______, \
-  _______, OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_F11,                       KC_F12,  OSMRSFT, OSMRCTL, OSMRALT, OSMRGUI, _______, \
-  _______, XXXXXXX, XXXXXXX, XXXXXXX, KC_CAPS, TD_BOOT, _______,    _______, XXXXXXX, KC_MUTE, KC_VOLD, KC_VOLU, KC_MPLY, _______, \
-                    _______, _______, _______, _______, _______,    _______, _______, _______, _______, _______ \
-),
-
-};
-
-layer_state_t layer_state_set_user(layer_state_t state) {
-  return update_tri_layer_state(state, _SYM, _NAV, _FUN);
-}
 
 #ifdef POINTING_DEVICE_ENABLE
 static bool trackball_scrolling = false;
 #endif // POINTING_DEVICE_ENABLE
 
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
 
         #ifdef POINTING_DEVICE_ENABLE
-        case KC_SCROLLING:
+        case SCROLL:
             if (record->event.pressed) {
                 trackball_scrolling = ! trackball_scrolling ;
             }
             return false;
             break;
         #endif // POINTING_DEVICE_ENABLE
-        
+
+        case KC_CUT:
+            if (mac_mode) {
+                // macOS mode
+                // need to send Cmd+X, but Ctrl/Cmd are swapped
+                if (record->event.pressed) {
+                    register_mods(mod_config(MOD_LCTL));
+                    register_code(KC_X);
+                } else {
+                    unregister_mods(mod_config(MOD_LCTL));
+                    unregister_code(KC_X);
+                }
+            } else {
+                // Windows & Linux mode
+                // Use Shift+Del to work anywhere (e.g. Linux terminal)
+                if (record->event.pressed) {
+                    register_mods(mod_config(MOD_LSFT));
+                    register_code(KC_DEL);
+                } else {
+                    unregister_mods(mod_config(MOD_LSFT));
+                    unregister_code(KC_DEL);
+                }
+            }
+            return false;
+            break;
+        case KC_COPY:
+            if (mac_mode) {
+                // macOS mode
+                // need to send Cmd+C, but Ctrl/Cmd are swapped
+                if (record->event.pressed) {
+                    register_mods(mod_config(MOD_LCTL));
+                    register_code(KC_C);
+                } else {
+                    unregister_mods(mod_config(MOD_LCTL));
+                    unregister_code(KC_C);
+                }
+            } else {
+                // Windows & Linux mode
+                // use Ctrl+Ins to work anywhere (e.g. Linux terminal)
+                if (record->event.pressed) {
+                    register_mods(mod_config(MOD_LCTL));
+                    register_code(KC_INS);
+                } else {
+                    unregister_mods(mod_config(MOD_LCTL));
+                    unregister_code(KC_INS);
+                }
+            }
+            return false;
+            break;
+        case KC_PASTE:
+            if (mac_mode) {
+                // macOS mode
+                // need to send Cmd+V, but Ctrl/Cmd are swapped
+                if (record->event.pressed) {
+                    register_mods(mod_config(MOD_LCTL));
+                    register_code(KC_V);
+                } else {
+                    unregister_mods(mod_config(MOD_LCTL));
+                    unregister_code(KC_V);
+                }
+            } else {
+                // Windows & Linux mode
+                // use Shift+Ins to work anywhere (e.g. Linux terminal)
+                if (record->event.pressed) {
+                    register_mods(mod_config(MOD_LSFT));
+                    register_code(KC_INS);
+                } else {
+                    unregister_mods(mod_config(MOD_LSFT));
+                    unregister_code(KC_INS);
+                }
+            }
+            return false;
+            break;
+        case KC_UNDO:
+            // No mac_mode switch because the same keycodes are needed for both modes
+            if (record->event.pressed) {
+                // cmd on macOS but CW_TOGG swaps this
+                register_mods(mod_config(MOD_LCTL));
+                register_code(KC_Z);
+            } else {
+                unregister_mods(mod_config(MOD_LCTL));
+                unregister_code(KC_Z);
+            }
+            return false;
+            break;
+        case KC_AGIN:
+            if (mac_mode) {
+                // macOS mode
+                if (record->event.pressed) {
+                    // cmd on macOS but CW_TOGG swaps this
+                    register_mods(mod_config(MOD_LCTL | MOD_LSFT));
+                    register_code(KC_Z);
+                } else {
+                    unregister_mods(mod_config(MOD_LCTL | MOD_LSFT));
+                    unregister_code(KC_Z);
+                }
+            } else {
+                // Windows & Linux mode
+                if (record->event.pressed) {
+                    register_mods(mod_config(MOD_LCTL));
+                    register_code(KC_Y);
+                } else {
+                    unregister_mods(mod_config(MOD_LCTL));
+                    unregister_code(KC_Y);
+                }
+            }
+            return false;
+            break;
         case OSMLSFT:
             if (record->event.pressed && record->tap.count) {
                 // If Caps Word is on, turn it off
@@ -156,8 +248,49 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return true;
             break;
+        // case SYM_QUO:
+        //     if (record->event.pressed && record->tap.count) {
+        //         // If shift is active and SYM_QUO is tapped
+        //         // then type double-quote instead of quote
+        //         if ((get_mods() | get_oneshot_mods()) & MOD_MASK_SHIFT) {
+        //             tap_code16(KC_NUDQ);
+        //             return false;
+        //         }
+        //     }
+        //     break;
+        case LOCKSCR:
+            if (mac_mode) {
+                // macOS mode
+                // Send Cmd+Ctrl+Q (ie. C(G(KC_Q)))
+                if (record->event.pressed) {
+                    register_mods(mod_config(MOD_LCTL | MOD_LGUI));
+                    register_code(KC_Q);
+                } else {
+                    unregister_mods(mod_config(MOD_LCTL | MOD_LGUI));
+                    unregister_code(KC_Q);
+                }
+            } else {
+                // Windows & Linux mode
+                // Send Win+L (ie. G(KC_L))
+                if (record->event.pressed) {
+                    register_mods(mod_config(MOD_LGUI));
+                    register_code(KC_L);
+                } else {
+                    unregister_mods(mod_config(MOD_LGUI));
+                    unregister_code(KC_L);
+                }
+            }
     }
     return true;
+}
+
+// Use post_process_record_user to get state after flag is flipped...
+void post_process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case CG_TOGG:
+            mac_mode = keymap_config.swap_lctl_lgui;
+            break;
+    }
 }
 
 #ifdef ENCODER_ENABLE
@@ -314,34 +447,59 @@ bool oled_task_user(void) {
 
     // Layer indicator
     switch (get_highest_layer(layer_state)) {
-        case _NAV:
-            oled_write_ln_P(PSTR("NAV"), true);
+        case _NAVI:
+            oled_write_ln_P(PSTR("NAVI"), true);
             break;
-        case _SYM:
-            oled_write_ln_P(PSTR("SYM"), true);
+        case _SYMB:
+            oled_write_ln_P(PSTR("SYMB"), true);
             break;
-        case _FUN:
-            oled_write_ln_P(PSTR("FUN"), true);
+        case _FUNC:
+            oled_write_ln_P(PSTR("FUNC"), true);
+            break;
+        case _NUMR:
+            oled_write_ln_P(PSTR("NUMR"), true);
+            break;
+        case _NUMP:
+            oled_write_ln_P(PSTR("NUMP"), true);
             break;
         default:
             oled_write_ln_P(PSTR("BASE"), true);
     }
-    
+    oled_write_ln_P(PSTR(""), false);
+
     // Mods state
     uint8_t mod_state = get_mods() | get_oneshot_mods();
     oled_write_P(PSTR("G"), mod_state & MOD_MASK_GUI);
     oled_write_P(PSTR("A"), mod_state & MOD_MASK_ALT);
     oled_write_P(PSTR("C"), mod_state & MOD_MASK_CTRL);
     oled_write_ln_P(PSTR("S"), mod_state & MOD_MASK_SHIFT);
+    oled_write_ln_P(PSTR(""), false);
 
     // Capsword state
     oled_write_ln_P(PSTR("C_W"), is_caps_word_on());
+    oled_write_ln_P(PSTR(""), false);
 
     // Capslock indicator
     led_t led_usb_state = host_keyboard_led_state();
     oled_write_P(PSTR("A"), led_usb_state.caps_lock);
     oled_write_P(PSTR("1"), led_usb_state.num_lock);
     oled_write_ln_P(PSTR("v"), led_usb_state.scroll_lock);
+    oled_write_ln_P(PSTR(""), false);
+
+    // PC or Mac mode
+    if (mac_mode) {
+        oled_write_ln_P(PSTR("mac"), false);
+    } else {
+        oled_write_ln_P(PSTR("PC"), false);
+    }
+    oled_write_ln_P(PSTR(""), false);
+
+    // Mousing or scrolling
+    if (trackball_scrolling) {
+        oled_write_ln_P(PSTR("SCRL"), true);
+    } else {
+        oled_write_ln_P(PSTR(""), false);
+    }
 
     return false;
 }
@@ -384,3 +542,73 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
 }
 
 #endif // POINTING_DEVICE_ENABLE
+
+
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+
+    // COLEMAK Mod-DH base layer
+    [_BASE] = LAYOUT(                                                                                                             \
+    KC_GRV,  KC_APP,  KC_LCBR, KC_LBRC, KC_LPRN, KC_LABK,                   KC_RABK, KC_RPRN, KC_RBRC, KC_RCBR, KC_MINS, KC_EQL,  \
+    KC_ESC,  KC_Q,    KC_W,    KC_F,    KC_P,    KC_B,                      KC_J,    KC_L,    KC_U,    KC_Y,    KC_MINS, KC_DEL,  \
+    KC_TAB,  KC_A,    KC_R,    KC_S,    KC_T,    KC_G,                      KC_M,    KC_N,    KC_E,    KC_I,    KC_O,    SCROLL,  \
+    KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_D,    KC_V,    KC_MUTE, XXXXXXX, KC_K,    KC_H,    KC_COMM, KC_DOT,  KC_QUOT, KC_RSFT, \
+                      KC_LCTL, KC_LGUI, KC_LALT, NAV_BSP, OSMLSFT, NUM_SPC, SYM_ENT, KC_RALT, KC_RGUI, KC_RCTL                    \
+    ),
+
+    // Number row layer
+    [_NUMR] = LAYOUT(                                                                                                             \
+    _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+    _______, KC_GRV,  KC_DLR,  KC_GBP,  KC_EUR,  KC_UNDS,                   KC_ASTR, KC_SLSH, KC_EQL,  KC_PLUS, _______, _______, \
+    _______, KC_7,    KC_5,    KC_3,    KC_1,    KC_9,                      KC_8,    KC_0,    KC_2,    KC_4,    KC_6,    _______, \
+    _______, KC_AMPR, KC_PERC, KC_NUHS, KC_LPRN, KC_RPRN, _______, _______, KC_LABK, KC_RABK, _______, _______, KC_CIRC, _______, \
+                      _______, _______, _______, _______, _______, _______, _______, _______, _______, _______                    \
+    ),
+
+    // Symbols layer
+    [_SYMB] = LAYOUT(                                                                                                             \
+    _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+    _______, KC_GRV,  S_GRV,   A_GRV,   KC_SCLN, KC_COLN,                   LAYERLK, XXXXXXX, XXXXXXX, C(KC_S), LOCKSCR, _______, \
+    _______, KC_QUES, KC_EXLM, KC_NUAT, KC_LBRC, KC_RBRC,                   KC_CAPS, OSMRSFT, OSMRCTL, OSMRALT, OSMRGUI, _______, \
+    _______, KC_NUBS, KC_NUPI, KC_NUTI, KC_LCBR, KC_RCBR, _______, _______, KC_AGIN, KC_PSTE, KC_COPY, KC_CUT,  KC_UNDO, _______, \
+                      _______, _______, _______, _______, _______, _______, _______, _______, _______, _______                    \
+    ),
+
+    // Navigation layer
+    [_NAVI] = LAYOUT(                                                                                                             \
+    _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+    _______, LOCKSCR, C(KC_S), C(KC_F), KC_APP,  LAYERLK,                   KC_ESC,  KC_BSPC, KC_DEL,  KC_INS,  KC_SPC,  _______, \
+    _______, OSMLGUI, OSMLALT, OSMLCTL, OSMLSFT, KC_CAPS,                   KC_TAB,  KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT,_______, \
+    _______, KC_UNDO, KC_CUT,  KC_COPY, KC_PSTE, KC_AGIN, _______, _______, KC_ENT,  KC_HOME, KC_PGDN, KC_PGUP, KC_END,  _______, \
+                      _______, _______, _______, _______, _______, _______, _______, _______, _______, _______                    \
+    ),
+
+    // Function keys layer
+    // Active with Symbols and Navigation
+    [_FUNC] = LAYOUT(                                                                                                             \
+    _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+    _______, TD_BOOT, CG_TOGG, RGB_VAD, RGB_VAI, KC_PSCR,                   _______, KC_F1,   KC_F2,   KC_F3,   KC_F4,   _______, \
+    _______, _______, _______, _______, _______, KC_SCRL,                   _______, KC_F5,   KC_F6,   KC_F7,   KC_F8,   _______, \
+    _______, KC_MUTE, KC_VOLD, KC_VOLU, KC_MPLY, KC_PAUS, _______, _______, _______, KC_F9,   KC_F10,  KC_F11,  KC_F12,  _______, \
+                      _______, _______, _______, _______, _______, _______, _______, _______, _______, _______                    \
+    ),
+
+    // Numpad layer
+    // Active with Numbers and Navigation
+    [_NUMP] = LAYOUT(                                                                                                             \
+    _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+    _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+    _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+                      _______, _______, _______, _______, _______, _______, _______, _______, _______, _______                    \
+    ),
+/*
+    // Blank layer
+    [] = LAYOUT(                                                                                                                  \
+    _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+    _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+    _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+                      _______, _______, _______, _______, _______, _______, _______, _______, _______, _______                    \
+    ),
+ */
+};
